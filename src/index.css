@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design tokens — extracted from "Barbearia - Telas" (Claude Design)
+   ============================================================ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, Arial, sans-serif;
+
+  /* Brand */
+  --color-brand: #024ad8;
+  --color-brand-hover: #0e3191;
+  --color-brand-light: #296ef9;
+  --color-brand-tint: #eef4fe;
+  --color-brand-tint-2: #dfebfd;
+  --color-brand-soft: #f2f6fe;
+  --color-brand-ink: #7aa8ff;
+
+  /* Neutrals / text */
+  --color-ink: #1a1a1a;
+  --color-ink-2: #3d3d3d;
+  --color-muted: #636363;
+  --color-muted-2: #8a8a8a;
+  --color-placeholder: #a5a5a5;
+
+  /* Surfaces */
+  --color-canvas: #eaedf1;
+  --color-screen: #f7f7f7;
+  --color-surface: #ffffff;
+  --color-surface-dark: #1a1a1a;
+  --color-surface-dark-2: #292929;
+
+  /* Lines */
+  --color-line: #e8e8e8;
+  --color-line-2: #f0f0f0;
+  --color-line-3: #d4d8dd;
+  --color-input-border: #c2c2c2;
+
+  /* Feedback */
+  --color-danger: #b3262b;
+  --color-danger-hover: #8f1e22;
+  --color-danger-border: #e2b6b3;
+  --color-danger-tint: #f9d4d2;
+  --color-danger-tint-2: #fbeeed;
+  --color-alert: #ff5050;
+  --color-star: #ffb800;
+  --color-teal: #356373;
+
+  /* Radii */
+  --radius-field: 4px;
+  --radius-card: 16px;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(26, 26, 26, 0.06);
+  --shadow-phone: 0 36px 72px -34px rgba(26, 26, 26, 0.55);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin/hidden scrollbars to match the design's clean surfaces */
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Animations pulled from the design */
+@keyframes fu {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-fade-up {
+  animation: fu 0.5s ease both;
+}
+.animate-pop {
+  animation: pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.animate-grow {
+  transform-origin: left;
+  animation: grow 0.55s ease both;
+}

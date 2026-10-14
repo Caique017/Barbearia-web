@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"5174 HTTP %{http_code}\\\\n\" \"http://localhost:5174/\")",
+      "Bash(curl -s -o /dev/null -w \"5173 HTTP %{http_code}\\\\n\" \"http://localhost:5173/\")",
+      "Bash(jobs -p)",
+      "Bash(xargs -r kill)"
+    ]
+  }
+}

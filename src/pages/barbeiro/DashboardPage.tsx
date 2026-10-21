@@ -21,7 +21,9 @@ function variacao(atual: ResumoFinanceiro, anterior: ResumoFinanceiro) {
 }
 
 export function DashboardPage() {
-  const [mes, setMes] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  // O mês corrente é lido uma vez, ao abrir a tela.
+  const [mesCorrente] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const [mes, setMes] = useState(mesCorrente)
   const chave = toISODate(mes)
   const { dados, erro, carregando, recarregar } = useCarregar(
     () => Promise.all([resumoDoMes(mes), resumoDoMes(new Date(mes.getFullYear(), mes.getMonth() - 1, 1))]),
@@ -30,7 +32,7 @@ export function DashboardPage() {
 
   const label = cap(mes.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }))
   const mudarMes = (delta: number) => setMes((m) => new Date(m.getFullYear(), m.getMonth() + delta, 1))
-  const ehMesAtual = chave === toISODate(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const ehMesAtual = chave === toISODate(mesCorrente)
 
   const atual = dados?.[0]
   const anterior = dados?.[1]

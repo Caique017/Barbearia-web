@@ -16,13 +16,14 @@ export function BarbeariaPage() {
   const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
-    setErro(null)
     if (!slug) return
     let active = true
     authApi
       .buscarBarbearia(slug)
       .then((b) => {
-        if (active) setBarbearia(b)
+        if (!active) return
+        setBarbearia(b)
+        setErro(null)
       })
       .catch((e) => {
         if (active) setErro(apiErrorMessage(e))

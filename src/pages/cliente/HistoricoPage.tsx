@@ -19,8 +19,8 @@ export function HistoricoPage() {
   const [ocupado, setOcupado] = useState(false)
   const [erroCancelar, setErroCancelar] = useState<string | null>(null)
 
+  const [agora] = useState(() => Date.now())
   const { proximos, anteriores, totalCortes, totalGasto } = useMemo(() => {
-    const agora = Date.now()
     const todos = dados ?? []
     const futuros = todos
       .filter((a) => a.status === 'CONFIRMADO' && new Date(a.dataHora).getTime() > agora)
@@ -35,7 +35,7 @@ export function HistoricoPage() {
       totalCortes: concluidos.length,
       totalGasto: concluidos.reduce((acc, a) => acc + a.preco, 0),
     }
-  }, [dados])
+  }, [dados, agora])
 
   const primeiroNome = (usuario?.nome ?? '').split(' ')[0]
 

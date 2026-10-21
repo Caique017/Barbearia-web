@@ -14,9 +14,26 @@ api.interceptors.request.use((config) => {
 const ehTentativaDeEntrar = (url: string | undefined) =>
   !!url && (url.includes("/login") || url.includes("/registro"));
 
+/** Disparado quando a API responde 402: o teste ou o mês pago do barbeiro acabou. */
+export const EVENTO_ASSINATURA_VENCIDA = "clipbook:assinatura-vencida";
+
 api.interceptors.response.use(
   (res) => res,
   (error) => {
+    // O cliente também recebe 402 ("barbearia não aceita agendamentos"), mas
+    // o aviso com link para o plano só faz sentido no painel do barbeiro.
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 402 &&
+      window.location.pathname.startsWith("/barbeiro")
+    ) {
+      window.dispatchEvent(
+        new CustomEvent(EVENTO_ASSINATURA_VENCIDA, {
+          detail: apiErrorMessage(error),
+        }),
+      );
+    }
+
     const sessaoExpirada =
       axios.isAxiosError(error) &&
       error.response?.status === 401 &&

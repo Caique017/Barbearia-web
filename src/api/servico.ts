@@ -1,16 +1,18 @@
 import { api } from './axios'
-import type { Servico, ServicoRequest } from '../types'
+import type { Servico, ServicoAtualizacao, ServicoPublico, ServicoRequest } from '../types'
 
-// TODO: integrar com API — rotas de serviço ainda não implementadas no backend
 export const servicoApi = {
-  listar: () => api.get<Servico[]>('/barbeiro/servicos').then((r) => r.data),
+  listar: () => api.get<Servico[]>('/servicos').then((r) => r.data),
 
-  criar: (data: ServicoRequest) =>
-    api.post<Servico>('/barbeiro/servicos', data).then((r) => r.data),
+  criar: (data: ServicoRequest) => api.post<Servico>('/servicos', data).then((r) => r.data),
 
-  editar: (id: string, data: ServicoRequest) =>
-    api.put<Servico>(`/barbeiro/servicos/${id}`, data).then((r) => r.data),
+  /** PATCH parcial: serve para editar e para ativar/desativar. */
+  atualizar: (id: string, data: ServicoAtualizacao) =>
+    api.patch<Servico>(`/servicos/${id}`, data).then((r) => r.data),
 
-  alternarAtivo: (id: string, ativo: boolean) =>
-    api.patch<Servico>(`/barbeiro/servicos/${id}/ativo`, { ativo }).then((r) => r.data),
+  /** Serviços ativos de uma barbearia, sem custo — usado pelo cliente. */
+  publicos: (slug: string) =>
+    api
+      .get<ServicoPublico[]>(`/barbeiros/publico/${encodeURIComponent(slug)}/servicos`)
+      .then((r) => r.data),
 }

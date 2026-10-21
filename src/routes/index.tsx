@@ -12,6 +12,9 @@ import { NovoAgendamentoPage } from "../pages/barbeiro/NovoAgendamentoPage";
 import { DetalheAgendamentoPage } from "../pages/barbeiro/DetalheAgendamentoPage";
 import { ServicosPage } from "../pages/barbeiro/ServicosPage";
 import { DashboardPage } from "../pages/barbeiro/DashboardPage";
+import { ClientesPage } from "../pages/barbeiro/ClientesPage";
+import { PerfilPage } from "../pages/barbeiro/PerfilPage";
+import { PlanoPage } from "../pages/barbeiro/PlanoPage";
 import { AgendamentoPage } from "../pages/cliente/AgendamentoPage";
 import { HistoricoPage } from "../pages/cliente/HistoricoPage";
 
@@ -29,7 +32,8 @@ export function AppRoutes() {
       <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
       <Route path="/b/:slug" element={<BarbeariaPage />} />
       <Route path="/b/:slug/cadastro" element={<CadastroPage />} />
-      <Route path="/agendar" element={<AgendamentoPage />} />
+      {/* Agendar online exige conta: o fluxo é o do cliente logado. */}
+      <Route path="/agendar" element={<Navigate to="/cliente/agendar" replace />} />
 
       {/* Barbeiro */}
       <Route element={<ProtectedRoute role="BARBEIRO" />}>
@@ -44,6 +48,10 @@ export function AppRoutes() {
         />
         <Route path="/barbeiro/servicos" element={<ServicosPage />} />
         <Route path="/barbeiro/dashboard" element={<DashboardPage />} />
+        <Route path="/barbeiro/clientes" element={<ClientesPage />} />
+        <Route path="/barbeiro/perfil" element={<PerfilPage />} />
+        {/* Destino de volta do Stripe: /barbeiro/plano?pagamento=ok */}
+        <Route path="/barbeiro/plano" element={<PlanoPage />} />
       </Route>
 
       {/* Cliente */}

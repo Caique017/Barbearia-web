@@ -2,16 +2,20 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { TopBar } from "../../components/layout/TopBar";
-import { Badge, Button, Modal } from "../../components/ui";
-import { mockAgendamento } from "../../data/mock";
+import { Badge, Button, Carregando, ErroCarregar, Input, Modal } from "../../components/ui";
+import { useCarregar } from "../../hooks/useCarregar";
+import { agendaApi } from "../../api/agenda";
+import { apiErrorMessage } from "../../api/axios";
+import { statusConfig } from "../../utils/status";
 import {
+  cap,
+  duracaoMinutos,
   formatCurrencyShort,
+  formatTelefone,
   formatTime,
   initials,
   whatsappLink,
 } from "../../utils/formatters";
-
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const formatDetalheData = (iso: string) => {
   const d = new Date(iso);
@@ -27,36 +31,83 @@ const formatDetalheData = (iso: string) => {
 export function DetalheAgendamentoPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  // TODO: integrar com API — GET /barbeiro/agendamento/:id
-  const ag = mockAgendamento(id);
+  const { dados: ag, setDados, erro, carregando, recarregar } = useCarregar(
+    () => agendaApi.detalhe(id),
+    [id],
+  );
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [motivo, setMotivo] = useState("");
-  const [cancelando, setCancelando] = useState(false);
+  const [remarcarOpen, setRemarcarOpen] = useState(false);
+  const [novaData, setNovaData] = useState("");
+  const [novaHora, setNovaHora] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+  const [erroAcao, setErroAcao] = useState<string | null>(null);
 
-  const confirmarCancelamento = async () => {
-    setCancelando(true);
+  if (!ag) {
+    return (
+      <AppShell className="bg-screen">
+        <TopBar title="Detalhes" to="/barbeiro/agenda" />
+        {carregando ? (
+          <Carregando />
+        ) : (
+          <ErroCarregar mensagem={erro ?? "Agendamento não encontrado."} onTentar={recarregar} />
+        )}
+      </AppShell>
+    );
+  }
+
+  const confirmado = ag.status === "CONFIRMADO";
+
+  const executar = async (acao: () => Promise<void>) => {
+    setOcupado(true);
+    setErroAcao(null);
     try {
-      // TODO: integrar com API — PATCH /barbeiro/agendamento/:id/status { status:'CANCELADO', motivo }
-      await new Promise((r) => setTimeout(r, 500));
-      navigate("/barbeiro/agenda");
+      await acao();
+    } catch (e) {
+      setErroAcao(apiErrorMessage(e));
     } finally {
-      setCancelando(false);
+      setOcupado(false);
     }
   };
 
+  const concluir = () => executar(async () => setDados(await agendaApi.concluir(ag.id)));
+  const falta = () => executar(async () => setDados(await agendaApi.falta(ag.id)));
+
+  const cancelar = () =>
+    executar(async () => {
+      await agendaApi.cancelar(ag.id);
+      navigate("/barbeiro/agenda");
+    });
+
+  const abrirRemarcar = () => {
+    setNovaData(ag.dataHora.slice(0, 10));
+    setNovaHora(ag.dataHora.slice(11, 16));
+    setErroAcao(null);
+    setRemarcarOpen(true);
+  };
+
+  const remarcar = () =>
+    executar(async () => {
+      if (!novaData || !novaHora) throw new Error();
+      const novo = await agendaApi.remarcar(ag.id, `${novaData}T${novaHora}:00`);
+      setRemarcarOpen(false);
+      navigate(`/barbeiro/agendamento/${novo.id}`, { replace: true });
+    });
+
   return (
     <AppShell className="bg-screen">
-      <TopBar title="Detalhes" />
+      <TopBar title="Detalhes" to="/barbeiro/agenda" />
 
       <div className="flex flex-1 flex-col px-[22px] pb-6 pt-2">
         {/* Cabeçalho do agendamento */}
-        <div className="mb-3.5 rounded-card border border-line border-l-4 border-l-brand bg-surface p-5 shadow-card">
+        <div
+          className={`mb-3.5 rounded-card border border-line border-l-4 ${statusConfig[ag.status].bar} bg-surface p-5 shadow-card`}
+        >
           <Badge status={ag.status} />
           <div className="mb-0.5 mt-3 text-[26px] font-semibold text-ink">
             {formatDetalheData(ag.dataHora)}
           </div>
           <div className="text-[14px] text-muted">
-            {ag.servico.nome} · {ag.servico.duracaoMinutos} min
+            {ag.servico.nome} · {duracaoMinutos(ag.dataHora, ag.terminaEm)} min
           </div>
         </div>
 
@@ -69,14 +120,10 @@ export function DetalheAgendamentoPage() {
             <div className="text-[15px] font-semibold text-ink">
               {ag.cliente.nome}
             </div>
-            <div className="text-[13px] text-muted">{ag.cliente.telefone}</div>
+            <div className="text-[13px] text-muted">{formatTelefone(ag.cliente.telefone)}</div>
           </div>
           <a
-            href={whatsappLink(
-              ag.cliente.telefone,
-              ag.cliente.nome,
-              formatTime(ag.dataHora),
-            )}
+            href={whatsappLink(ag.cliente.telefone, ag.cliente.nome, ag.dataHora)}
             target="_blank"
             rel="noreferrer"
             aria-label="Abrir WhatsApp"
@@ -94,41 +141,89 @@ export function DetalheAgendamentoPage() {
             Valor do serviço
           </span>
           <span className="text-[20px] font-semibold text-white">
-            {formatCurrencyShort(ag.servico.preco)}
+            {formatCurrencyShort(ag.preco)}
           </span>
         </div>
+
+        {erroAcao && !remarcarOpen && !cancelOpen && (
+          <p className="mt-3 text-[13px] text-danger">{erroAcao}</p>
+        )}
       </div>
 
-      {/* Ações */}
-      <div className="sticky bottom-0 flex-none border-t border-line bg-surface px-5 pb-6 pt-3 shadow-[0_-2px_8px_rgba(26,26,26,.04)]">
-        <div className="mb-2.5 flex gap-2.5">
-          {/* TODO: integrar com API — editar horário / trocar serviço */}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-[46px] flex-1 text-[12px]"
-          >
-            Editar horário
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-[46px] flex-1 text-[12px]"
-          >
-            Trocar serviço
-          </Button>
+      {/* Ações — só um agendamento confirmado ainda muda */}
+      {confirmado && (
+        <div className="sticky bottom-0 flex-none border-t border-line bg-surface px-5 pb-6 pt-3 shadow-[0_-2px_8px_rgba(26,26,26,.04)]">
+          <div className="mb-2.5 flex gap-2.5">
+            <Button size="sm" className="h-[46px] flex-1 text-[12px]" loading={ocupado} onClick={concluir}>
+              Concluído
+            </Button>
+            <Button
+              variant="destructiveOutline"
+              size="sm"
+              className="h-[46px] flex-1 text-[12px]"
+              disabled={ocupado}
+              onClick={falta}
+            >
+              Faltou
+            </Button>
+          </div>
+          <div className="flex gap-2.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-[46px] flex-1 text-[12px]"
+              disabled={ocupado}
+              onClick={abrirRemarcar}
+            >
+              Remarcar
+            </Button>
+            <Button
+              variant="destructiveOutline"
+              size="sm"
+              className="h-[46px] flex-1 text-[12px]"
+              disabled={ocupado}
+              onClick={() => {
+                setErroAcao(null);
+                setCancelOpen(true);
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+          <p className="mt-2 text-center text-[12px] text-muted">
+            Concluir e faltou só valem depois do horário marcado.
+          </p>
         </div>
-        <Button
-          variant="destructiveOutline"
-          className="h-[46px] w-full text-[12px]"
-          onClick={() => setCancelOpen(true)}
-        >
-          Cancelar agendamento
-        </Button>
-        <p className="mt-2 text-center text-[12px] text-muted">
-          Cancela o horário sem gerar cobrança.
+      )}
+
+      {/* Modal de remarcação */}
+      <Modal open={remarcarOpen} onClose={() => setRemarcarOpen(false)} title="Remarcar horário">
+        <p className="mb-4 text-[13.5px] leading-relaxed text-ink-2">
+          O horário atual fica livre e um novo agendamento é criado com o mesmo serviço e preço.
+          Você pode marcar fora do expediente.
         </p>
-      </div>
+        <div className="mb-4 flex gap-2.5">
+          <Input
+            label="Dia"
+            type="date"
+            className="flex-1"
+            value={novaData}
+            onChange={(e) => setNovaData(e.target.value)}
+          />
+          <Input
+            label="Hora"
+            type="time"
+            step={300}
+            className="w-[120px]"
+            value={novaHora}
+            onChange={(e) => setNovaHora(e.target.value)}
+          />
+        </div>
+        {erroAcao && <p className="mb-3 text-[13px] text-danger">{erroAcao}</p>}
+        <Button className="w-full" loading={ocupado} disabled={!novaData || !novaHora} onClick={remarcar}>
+          Confirmar novo horário
+        </Button>
+      </Modal>
 
       {/* Modal de cancelamento */}
       <Modal open={cancelOpen} onClose={() => setCancelOpen(false)}>
@@ -148,7 +243,7 @@ export function DetalheAgendamentoPage() {
           Cancelar este agendamento?
         </h2>
         <p className="mb-5 text-[14px] leading-relaxed text-ink-2">
-          O horário voltará a ficar disponível. Esta ação não pode ser desfeita.
+          O horário volta a ficar disponível. Esta ação não pode ser desfeita.
         </p>
         <div className="mb-5 rounded-card border border-line border-l-4 border-l-danger bg-surface px-4 py-3.5 opacity-80">
           <div className="flex items-center gap-3">
@@ -160,28 +255,17 @@ export function DetalheAgendamentoPage() {
                 {ag.cliente.nome}
               </div>
               <div className="text-[12.5px] text-muted">
-                {ag.servico.nome} · {ag.servico.duracaoMinutos} min
+                {ag.servico.nome} · {duracaoMinutos(ag.dataHora, ag.terminaEm)} min
               </div>
             </div>
           </div>
         </div>
-        <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.4px] text-muted">
-          Motivo{" "}
-          <span className="font-normal normal-case tracking-normal">
-            (opcional)
-          </span>
-        </label>
-        <textarea
-          value={motivo}
-          onChange={(e) => setMotivo(e.target.value)}
-          placeholder="Ex: cliente pediu para remarcar"
-          className="mb-5 h-[84px] w-full resize-none rounded-field border-[1.5px] border-input-border bg-surface px-3.5 py-3 text-[14.5px] text-ink outline-none placeholder:text-placeholder focus:border-ink"
-        />
+        {erroAcao && <p className="mb-3 text-[13px] text-danger">{erroAcao}</p>}
         <Button
           variant="destructive"
           className="w-full"
-          loading={cancelando}
-          onClick={confirmarCancelamento}
+          loading={ocupado}
+          onClick={cancelar}
         >
           Confirmar cancelamento
         </Button>

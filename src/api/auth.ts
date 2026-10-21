@@ -1,22 +1,46 @@
-import { api } from './axios'
+import { api } from "./axios";
 import type {
   BarbeiroCadastroRequest,
   ClienteCadastroRequest,
   LoginRequest,
   LoginResponse,
   Usuario,
-} from '../types'
+  BarbeiroCadastroResponse,
+  ClienteCadastroResponse,
+  BarbeariaPublica,
+  EsqueciSenhaRequest,
+  RedefinirSenhaRequest,
+} from "../types";
 
 export const authApi = {
-  login: (data: LoginRequest) =>
-    api.post<LoginResponse>('/auth/login', data).then((r) => r.data),
+  loginBarbeiro: (data: LoginRequest) =>
+    api.post<LoginResponse>("/auth/barbeiro/login", data).then((r) => r.data),
 
   registrarBarbeiro: (data: BarbeiroCadastroRequest) =>
-    api.post<LoginResponse>('/auth/registro', data).then((r) => r.data),
+    api
+      .post<BarbeiroCadastroResponse>("/auth/barbeiro/registro", data)
+      .then((r) => r.data),
 
-  // TODO: integrar com API — rota de cadastro de cliente ainda não implementada no backend
+  loginCliente: (data: LoginRequest) =>
+    api.post<LoginResponse>("/auth/cliente/login", data).then((r) => r.data),
+
   registrarCliente: (data: ClienteCadastroRequest) =>
-    api.post<LoginResponse>('/auth/registro', data).then((r) => r.data),
+    api
+      .post<ClienteCadastroResponse>("/auth/cliente/registro", data)
+      .then((r) => r.data),
 
-  me: () => api.get<Usuario>('/auth/me').then((r) => r.data),
-}
+  buscarBarbearia: (slug: string) =>
+    api
+      .get<BarbeariaPublica>(`/barbeiros/publico/${encodeURIComponent(slug)}`)
+      .then((r) => r.data),
+
+  me: () => api.get<Usuario>("/auth/me").then((r) => r.data),
+
+  // Os dois respondem 204 sem corpo. O "esqueci" é silencioso de propósito:
+  // responde igual para e-mail existente, inexistente ou pedido repetido.
+  esqueciSenha: (data: EsqueciSenhaRequest) =>
+    api.post<void>("/auth/senha/esqueci", data).then(() => undefined),
+
+  redefinirSenha: (data: RedefinirSenhaRequest) =>
+    api.post<void>("/auth/senha/redefinir", data).then(() => undefined),
+};

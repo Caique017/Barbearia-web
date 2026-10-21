@@ -1,15 +1,19 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { ProtectedRoute } from '../components/layout/ProtectedRoute'
-import { LoginPage } from '../pages/auth/LoginPage'
-import { BarbeiroLoginPage } from '../pages/auth/BarbeiroLoginPage'
-import { CadastroPage } from '../pages/auth/CadastroPage'
-import { AgendaPage } from '../pages/barbeiro/AgendaPage'
-import { NovoAgendamentoPage } from '../pages/barbeiro/NovoAgendamentoPage'
-import { DetalheAgendamentoPage } from '../pages/barbeiro/DetalheAgendamentoPage'
-import { ServicosPage } from '../pages/barbeiro/ServicosPage'
-import { DashboardPage } from '../pages/barbeiro/DashboardPage'
-import { AgendamentoPage } from '../pages/cliente/AgendamentoPage'
-import { HistoricoPage } from '../pages/cliente/HistoricoPage'
+import { Navigate, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "../components/layout/ProtectedRoute";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { BarbeiroLoginPage } from "../pages/auth/BarbeiroLoginPage";
+import { CadastroPage } from "../pages/auth/CadastroPage";
+import { BarbeiroCadastroPage } from "../pages/auth/BarbeiroCadastroPage";
+import { BarbeariaPage } from "../pages/publico/BarbeariaPage";
+import { EsqueciSenhaPage } from "../pages/auth/EsqueciSenhaPage";
+import { RedefinirSenhaPage } from "../pages/auth/RedefinirSenhaPage";
+import { AgendaPage } from "../pages/barbeiro/AgendaPage";
+import { NovoAgendamentoPage } from "../pages/barbeiro/NovoAgendamentoPage";
+import { DetalheAgendamentoPage } from "../pages/barbeiro/DetalheAgendamentoPage";
+import { ServicosPage } from "../pages/barbeiro/ServicosPage";
+import { DashboardPage } from "../pages/barbeiro/DashboardPage";
+import { AgendamentoPage } from "../pages/cliente/AgendamentoPage";
+import { HistoricoPage } from "../pages/cliente/HistoricoPage";
 
 export function AppRoutes() {
   return (
@@ -19,14 +23,25 @@ export function AppRoutes() {
       {/* Públicas */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/barbeiro/login" element={<BarbeiroLoginPage />} />
-      <Route path="/cadastro" element={<CadastroPage />} />
+      <Route path="/barbeiro/cadastro" element={<BarbeiroCadastroPage />} />
+      <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+      {/* Destino do link que a API manda por e-mail: /redefinir-senha?token=... */}
+      <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+      <Route path="/b/:slug" element={<BarbeariaPage />} />
+      <Route path="/b/:slug/cadastro" element={<CadastroPage />} />
       <Route path="/agendar" element={<AgendamentoPage />} />
 
       {/* Barbeiro */}
       <Route element={<ProtectedRoute role="BARBEIRO" />}>
         <Route path="/barbeiro/agenda" element={<AgendaPage />} />
-        <Route path="/barbeiro/agendamento/novo" element={<NovoAgendamentoPage />} />
-        <Route path="/barbeiro/agendamento/:id" element={<DetalheAgendamentoPage />} />
+        <Route
+          path="/barbeiro/agendamento/novo"
+          element={<NovoAgendamentoPage />}
+        />
+        <Route
+          path="/barbeiro/agendamento/:id"
+          element={<DetalheAgendamentoPage />}
+        />
         <Route path="/barbeiro/servicos" element={<ServicosPage />} />
         <Route path="/barbeiro/dashboard" element={<DashboardPage />} />
       </Route>
@@ -39,5 +54,5 @@ export function AppRoutes() {
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-  )
+  );
 }

@@ -1,43 +1,46 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { AppShell } from '../../components/layout/AppShell'
-import { Logo } from '../../components/layout/Logo'
-import { Button, Input } from '../../components/ui'
-import { authApi } from '../../api/auth'
-import { apiErrorMessage } from '../../api/axios'
-import { useAuth } from '../../hooks/useAuth'
-import { homeFor } from '../../components/layout/ProtectedRoute'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { AppShell } from "../../components/layout/AppShell";
+import { Logo } from "../../components/layout/Logo";
+import { Button, Input } from "../../components/ui";
+import { authApi } from "../../api/auth";
+import { apiErrorMessage } from "../../api/axios";
+import { useAuth } from "../../hooks/useAuth";
+import { homeFor } from "../../components/layout/ProtectedRoute";
 
 const schema = z.object({
-  email: z.string().min(1, 'Informe seu e-mail').email('E-mail inválido'),
-  senha: z.string().min(1, 'Informe sua senha'),
-})
-type FormData = z.infer<typeof schema>
+  email: z.string().min(1, "Informe seu e-mail").email("E-mail inválido"),
+  senha: z.string().min(1, "Informe sua senha"),
+});
+type FormData = z.infer<typeof schema>;
 
 /** Login do barbeiro (design 2.1) — acesso profissional, tema escuro. */
 export function BarbeiroLoginPage() {
-  const navigate = useNavigate()
-  const { login } = useAuth()
-  const [erro, setErro] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [erro, setErro] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = handleSubmit(async (data) => {
-    setErro(null)
+    setErro(null);
     try {
-      const res = await authApi.login({ email: data.email, senha: data.senha })
-      login(res)
-      navigate(homeFor(res.role), { replace: true })
+      const res = await authApi.loginBarbeiro({
+        email: data.email,
+        senha: data.senha,
+      });
+      const usuario = await login(res.token);
+      navigate(homeFor(usuario.role), { replace: true });
     } catch (e) {
-      setErro(apiErrorMessage(e, 'E-mail ou senha incorretos'))
+      setErro(apiErrorMessage(e, "E-mail ou senha incorretos"));
     }
-  })
+  });
 
   return (
     <AppShell className="bg-surface-dark">
@@ -56,7 +59,9 @@ export function BarbeiroLoginPage() {
             </div>
             <div className="mb-2.5 flex items-center gap-2.5">
               <Logo size={32} />
-              <span className="text-[24px] font-semibold text-white">ClipBook</span>
+              <span className="text-[24px] font-semibold text-white">
+                ClipBook
+              </span>
             </div>
             <p className="text-[14px] leading-relaxed text-white/60">
               Painel de gestão da sua barbearia.
@@ -72,7 +77,7 @@ export function BarbeiroLoginPage() {
                 placeholder="voce@barbearia.com"
                 autoComplete="email"
                 error={errors.email?.message}
-                {...register('email')}
+                {...register("email")}
               />
               <Input
                 label="Senha"
@@ -81,24 +86,40 @@ export function BarbeiroLoginPage() {
                 autoComplete="current-password"
                 className="mt-3"
                 error={errors.senha?.message}
-                {...register('senha')}
+                {...register("senha")}
               />
+              <div className="mt-2 text-right">
+                <Link
+                  to="/esqueci-senha"
+                  state={{ voltarPara: "/barbeiro/login" }}
+                  className="text-[12.5px] font-medium text-brand-ink"
+                >
+                  Esqueci a senha
+                </Link>
+              </div>
               {erro && (
                 <p className="mt-3 rounded-field bg-danger-tint-2 px-3 py-2 text-[13px] text-danger">
                   {erro}
                 </p>
               )}
-              <Button type="submit" className="mt-[18px] w-full" loading={isSubmitting}>
+              <Button
+                type="submit"
+                className="mt-[18px] w-full"
+                loading={isSubmitting}
+              >
                 Entrar
               </Button>
             </form>
           </div>
 
-          <p className="mt-[18px] text-center text-[12px] text-white/45">
-            O acesso do barbeiro é criado pela administração.
+          <p className="mt-[18px] text-center text-[12px] text-white/60">
+            Ainda não tem barbearia?{" "}
+            <Link to="/barbeiro/cadastro" className="font-semibold text-brand-ink">
+              Criar conta
+            </Link>
           </p>
         </div>
       </div>
     </AppShell>
-  )
+  );
 }

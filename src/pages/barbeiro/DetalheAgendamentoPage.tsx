@@ -1,39 +1,48 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { AppShell } from '../../components/layout/AppShell'
-import { TopBar } from '../../components/layout/TopBar'
-import { Badge, Button, Modal } from '../../components/ui'
-import { mockAgendamento } from '../../data/mock'
-import { formatCurrencyShort, formatTime, initials, whatsappLink } from '../../utils/formatters'
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { AppShell } from "../../components/layout/AppShell";
+import { TopBar } from "../../components/layout/TopBar";
+import { Badge, Button, Modal } from "../../components/ui";
+import { mockAgendamento } from "../../data/mock";
+import {
+  formatCurrencyShort,
+  formatTime,
+  initials,
+  whatsappLink,
+} from "../../utils/formatters";
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const formatDetalheData = (iso: string) => {
-  const d = new Date(iso)
-  const weekday = cap(d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''))
-  const mes = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
-  return `${weekday}, ${d.getDate()} ${mes} · ${formatTime(iso)}`
-}
+  const d = new Date(iso);
+  const weekday = cap(
+    d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", ""),
+  );
+  const mes = d
+    .toLocaleDateString("pt-BR", { month: "short" })
+    .replace(".", "");
+  return `${weekday}, ${d.getDate()} ${mes} · ${formatTime(iso)}`;
+};
 
 export function DetalheAgendamentoPage() {
-  const { id = '' } = useParams()
-  const navigate = useNavigate()
+  const { id = "" } = useParams();
+  const navigate = useNavigate();
   // TODO: integrar com API — GET /barbeiro/agendamento/:id
-  const ag = mockAgendamento(id)
-  const [cancelOpen, setCancelOpen] = useState(false)
-  const [motivo, setMotivo] = useState('')
-  const [cancelando, setCancelando] = useState(false)
+  const ag = mockAgendamento(id);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [cancelando, setCancelando] = useState(false);
 
   const confirmarCancelamento = async () => {
-    setCancelando(true)
+    setCancelando(true);
     try {
       // TODO: integrar com API — PATCH /barbeiro/agendamento/:id/status { status:'CANCELADO', motivo }
-      await new Promise((r) => setTimeout(r, 500))
-      navigate('/barbeiro/agenda')
+      await new Promise((r) => setTimeout(r, 500));
+      navigate("/barbeiro/agenda");
     } finally {
-      setCancelando(false)
+      setCancelando(false);
     }
-  }
+  };
 
   return (
     <AppShell className="bg-screen">
@@ -57,11 +66,17 @@ export function DetalheAgendamentoPage() {
             {initials(ag.cliente.nome)}
           </div>
           <div className="flex-1">
-            <div className="text-[15px] font-semibold text-ink">{ag.cliente.nome}</div>
-            <div className="text-[13px] text-muted">{ag.cliente.whatsapp}</div>
+            <div className="text-[15px] font-semibold text-ink">
+              {ag.cliente.nome}
+            </div>
+            <div className="text-[13px] text-muted">{ag.cliente.telefone}</div>
           </div>
           <a
-            href={whatsappLink(ag.cliente.whatsapp, ag.cliente.nome, formatTime(ag.dataHora))}
+            href={whatsappLink(
+              ag.cliente.telefone,
+              ag.cliente.nome,
+              formatTime(ag.dataHora),
+            )}
             target="_blank"
             rel="noreferrer"
             aria-label="Abrir WhatsApp"
@@ -75,7 +90,9 @@ export function DetalheAgendamentoPage() {
 
         {/* Valor */}
         <div className="flex items-center justify-between rounded-card bg-ink p-4">
-          <span className="text-[13.5px] font-medium text-white">Valor do serviço</span>
+          <span className="text-[13.5px] font-medium text-white">
+            Valor do serviço
+          </span>
           <span className="text-[20px] font-semibold text-white">
             {formatCurrencyShort(ag.servico.preco)}
           </span>
@@ -86,10 +103,18 @@ export function DetalheAgendamentoPage() {
       <div className="sticky bottom-0 flex-none border-t border-line bg-surface px-5 pb-6 pt-3 shadow-[0_-2px_8px_rgba(26,26,26,.04)]">
         <div className="mb-2.5 flex gap-2.5">
           {/* TODO: integrar com API — editar horário / trocar serviço */}
-          <Button variant="secondary" size="sm" className="h-[46px] flex-1 text-[12px]">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-[46px] flex-1 text-[12px]"
+          >
             Editar horário
           </Button>
-          <Button variant="secondary" size="sm" className="h-[46px] flex-1 text-[12px]">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-[46px] flex-1 text-[12px]"
+          >
             Trocar serviço
           </Button>
         </div>
@@ -108,7 +133,14 @@ export function DetalheAgendamentoPage() {
       {/* Modal de cancelamento */}
       <Modal open={cancelOpen} onClose={() => setCancelOpen(false)}>
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-danger-tint">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#b3262b" strokeWidth="2.2">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#b3262b"
+            strokeWidth="2.2"
+          >
             <path d="M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
           </svg>
         </div>
@@ -120,9 +152,13 @@ export function DetalheAgendamentoPage() {
         </p>
         <div className="mb-5 rounded-card border border-line border-l-4 border-l-danger bg-surface px-4 py-3.5 opacity-80">
           <div className="flex items-center gap-3">
-            <div className="text-[18px] font-semibold text-ink">{formatTime(ag.dataHora)}</div>
+            <div className="text-[18px] font-semibold text-ink">
+              {formatTime(ag.dataHora)}
+            </div>
             <div className="flex-1">
-              <div className="text-[14px] font-semibold text-ink">{ag.cliente.nome}</div>
+              <div className="text-[14px] font-semibold text-ink">
+                {ag.cliente.nome}
+              </div>
               <div className="text-[12.5px] text-muted">
                 {ag.servico.nome} · {ag.servico.duracaoMinutos} min
               </div>
@@ -130,7 +166,10 @@ export function DetalheAgendamentoPage() {
           </div>
         </div>
         <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.4px] text-muted">
-          Motivo <span className="font-normal normal-case tracking-normal">(opcional)</span>
+          Motivo{" "}
+          <span className="font-normal normal-case tracking-normal">
+            (opcional)
+          </span>
         </label>
         <textarea
           value={motivo}
@@ -155,5 +194,5 @@ export function DetalheAgendamentoPage() {
         </Button>
       </Modal>
     </AppShell>
-  )
+  );
 }

@@ -1,12 +1,8 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import type { Role } from '../../types'
-import { loginFor } from '../../utils/auth-routes'
+import { homeFor, loginFor } from '../../utils/auth-routes'
 import { Spinner } from '../ui/Spinner'
-
-/** Home de cada perfil — usada em redirecionamentos. */
-export const homeFor = (role: Role) =>
-  role === 'BARBEIRO' ? '/barbeiro/agenda' : '/cliente/historico'
 
 function FullScreenLoader() {
   return (

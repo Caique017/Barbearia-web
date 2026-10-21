@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,8 +24,13 @@ type FormData = z.infer<typeof schema>
 export function RedefinirSenhaPage() {
   const navigate = useNavigate()
   // O e-mail da API aponta para /redefinir-senha?token=...
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  // Guarda o token e tira da barra de endereço: não fica no histórico nem vaza
+  // para outra página.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [token] = useState(() => searchParams.get('token'))
+  useEffect(() => {
+    if (searchParams.has('token')) setSearchParams({}, { replace: true })
+  }, [searchParams, setSearchParams])
   const [pronto, setPronto] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const {

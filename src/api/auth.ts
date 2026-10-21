@@ -36,6 +36,9 @@ export const authApi = {
 
   me: () => api.get<Usuario>("/auth/me").then((r) => r.data),
 
+  // Encerra todas as sessões no servidor: tokens já emitidos param de valer.
+  sair: () => api.post<void>("/auth/sair").then(() => undefined),
+
   // Os dois respondem 204 sem corpo. O "esqueci" é silencioso de propósito:
   // responde igual para e-mail existente, inexistente ou pedido repetido.
   esqueciSenha: (data: EsqueciSenhaRequest) =>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
@@ -158,15 +158,31 @@ function SecaoLink({ perfil, onSalvo }: { perfil: PerfilBarbeiro; onSalvo: (p: P
 
 /* ------------------------------ Faixas de horário ----------------------------- */
 function SecaoHorarios() {
-  const { dados, erro: erroCarregar, carregando, recarregar } = useCarregar(barbeiroApi.horarios)
-  const [faixas, setFaixas] = useState<FaixaHorario[]>([])
+  const { dados, erro, carregando, recarregar } = useCarregar(barbeiroApi.horarios)
+  return (
+    <Secao
+      titulo="Horário de atendimento"
+      descricao="É daqui que saem os horários livres do link. Para o almoço, use duas faixas no mesmo dia."
+    >
+      {dados ? (
+        <EditorFaixas inicial={dados} />
+      ) : carregando ? (
+        <Carregando className="py-6" />
+      ) : (
+        <ErroCarregar mensagem={erro ?? 'Não foi possível carregar.'} onTentar={recarregar} />
+      )}
+    </Secao>
+  )
+}
+
+/** Monta só depois que as faixas chegam, então o estado já nasce com elas. */
+function EditorFaixas({ inicial }: { inicial: FaixaHorario[] }) {
+  const [faixas, setFaixas] = useState<FaixaHorario[]>(() =>
+    inicial.map((f) => ({ ...f, abre: horaCurta(f.abre), fecha: horaCurta(f.fecha) })),
+  )
   const [salvando, setSalvando] = useState(false)
   const [ok, setOk] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (dados) setFaixas(dados.map((f) => ({ ...f, abre: horaCurta(f.abre), fecha: horaCurta(f.fecha) })))
-  }, [dados])
 
   const doDia = (dia: DiaSemana) => faixas.map((f, i) => ({ f, i })).filter(({ f }) => f.diaSemana === dia)
 
@@ -200,68 +216,57 @@ function SecaoHorarios() {
   }
 
   return (
-    <Secao
-      titulo="Horário de atendimento"
-      descricao="É daqui que saem os horários livres do link. Para o almoço, use duas faixas no mesmo dia."
-    >
-      {carregando && !dados ? (
-        <Carregando className="py-6" />
-      ) : erroCarregar && !dados ? (
-        <ErroCarregar mensagem={erroCarregar} onTentar={recarregar} />
-      ) : (
-        <>
-          <div className="flex flex-col divide-y divide-line-2">
-            {diasDaSemana.map((d) => {
-              const lista = doDia(d.valor)
-              return (
-                <div key={d.valor} className="flex items-start gap-3 py-2.5">
-                  <div className="w-[64px] flex-none pt-2.5 text-[13px] font-semibold text-ink">{d.nome}</div>
-                  <div className="flex flex-1 flex-col gap-2">
-                    {lista.length === 0 && <span className="pt-2.5 text-[13px] text-muted-2">Fechado</span>}
-                    {lista.map(({ f, i }) => (
-                      <div key={i} className="flex items-center gap-1.5">
-                        <input
-                          type="time"
-                          aria-label={`${d.nome}: abre`}
-                          value={f.abre}
-                          onChange={(e) => mudar(i, 'abre', e.target.value)}
-                          className="h-10 w-[104px] rounded-field border-[1.5px] border-input-border bg-surface px-2 text-[14px] text-ink outline-none focus:border-ink"
-                        />
-                        <span className="text-muted">–</span>
-                        <input
-                          type="time"
-                          aria-label={`${d.nome}: fecha`}
-                          value={f.fecha}
-                          onChange={(e) => mudar(i, 'fecha', e.target.value)}
-                          className="h-10 w-[104px] rounded-field border-[1.5px] border-input-border bg-surface px-2 text-[14px] text-ink outline-none focus:border-ink"
-                        />
-                        <button
-                          onClick={() => remover(i)}
-                          aria-label={`Remover faixa de ${d.nome}`}
-                          className="flex h-8 w-8 items-center justify-center rounded-field text-[18px] text-muted hover:bg-screen hover:text-danger"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+    <>
+      <div className="flex flex-col divide-y divide-line-2">
+        {diasDaSemana.map((d) => {
+          const lista = doDia(d.valor)
+          return (
+            <div key={d.valor} className="flex items-start gap-3 py-2.5">
+              <div className="w-[64px] flex-none pt-2.5 text-[13px] font-semibold text-ink">{d.nome}</div>
+              <div className="flex flex-1 flex-col gap-2">
+                {lista.length === 0 && <span className="pt-2.5 text-[13px] text-muted-2">Fechado</span>}
+                {lista.map(({ f, i }) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <input
+                      type="time"
+                      aria-label={`${d.nome}: abre`}
+                      value={f.abre}
+                      onChange={(e) => mudar(i, 'abre', e.target.value)}
+                      className="h-10 w-[104px] rounded-field border-[1.5px] border-input-border bg-surface px-2 text-[14px] text-ink outline-none focus:border-ink"
+                    />
+                    <span className="text-muted">–</span>
+                    <input
+                      type="time"
+                      aria-label={`${d.nome}: fecha`}
+                      value={f.fecha}
+                      onChange={(e) => mudar(i, 'fecha', e.target.value)}
+                      className="h-10 w-[104px] rounded-field border-[1.5px] border-input-border bg-surface px-2 text-[14px] text-ink outline-none focus:border-ink"
+                    />
+                    <button
+                      onClick={() => remover(i)}
+                      aria-label={`Remover faixa de ${d.nome}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-field text-[18px] text-muted hover:bg-screen hover:text-danger"
+                    >
+                      ×
+                    </button>
                   </div>
-                  <button
-                    onClick={() => adicionar(d.valor)}
-                    className="flex-none pt-2.5 text-[11.5px] font-semibold uppercase tracking-[0.4px] text-brand"
-                  >
-                    + Faixa
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-          <Button className="mt-3 w-full" loading={salvando} onClick={salvar}>
-            Salvar horários
-          </Button>
-          <Retorno ok={ok} erro={erro} />
-        </>
-      )}
-    </Secao>
+                ))}
+              </div>
+              <button
+                onClick={() => adicionar(d.valor)}
+                className="flex-none pt-2.5 text-[11.5px] font-semibold uppercase tracking-[0.4px] text-brand"
+              >
+                + Faixa
+              </button>
+            </div>
+          )
+        })}
+      </div>
+      <Button className="mt-3 w-full" loading={salvando} onClick={salvar}>
+        Salvar horários
+      </Button>
+      <Retorno ok={ok} erro={erro} />
+    </>
   )
 }
 

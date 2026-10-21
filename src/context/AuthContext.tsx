@@ -16,11 +16,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Hidrata o usuário a partir do token salvo (GET /auth/me)
   useEffect(() => {
-    const saved = localStorage.getItem("token");
-    if (!saved) {
-      setLoading(false);
-      return;
-    }
+    // Sem token, `loading` já nasce false — não há o que hidratar.
+    if (!localStorage.getItem("token")) return;
     let active = true;
     authApi
       .me()

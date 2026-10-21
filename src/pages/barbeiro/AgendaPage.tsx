@@ -26,6 +26,8 @@ const apagado = (a: Agendamento) =>
 
 export function AgendaPage() {
   const [dia, setDia] = useState(() => new Date());
+  // "Hoje" é lido uma vez, ao abrir a tela.
+  const [hojeISO] = useState(() => toISODate(new Date()));
   const diaISO = toISODate(dia);
   const { dados, setDados, erro, carregando, recarregar } = useCarregar(
     () => agendaApi.doPeriodo(diaISO),
@@ -64,7 +66,7 @@ export function AgendaPage() {
     };
   }, [agenda]);
 
-  const ehHoje = diaISO === toISODate(new Date());
+  const ehHoje = diaISO === hojeISO;
   const rotuloPrevisto = ehHoje ? "previsto hoje" : "previsto no dia";
 
   const estado =

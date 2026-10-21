@@ -55,6 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const destino = usuario
       ? loginFor(usuario.role)
       : loginForPath(window.location.pathname);
+    // Avisa o servidor para invalidar o token; se falhar, sai mesmo assim.
+    if (localStorage.getItem("token")) {
+      authApi.sair().catch(() => undefined);
+    }
     localStorage.removeItem("token");
     setToken(null);
     setUsuario(null);

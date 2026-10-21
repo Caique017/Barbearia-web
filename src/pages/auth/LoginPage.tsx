@@ -8,7 +8,7 @@ import { Button, Input } from "../../components/ui";
 import { authApi } from "../../api/auth";
 import { apiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
-import { homeFor } from "../../components/layout/ProtectedRoute";
+import { homeFor } from "../../utils/auth-routes";
 
 const schema = z.object({
   email: z.string().min(1, "Informe seu e-mail").email("E-mail inválido"),

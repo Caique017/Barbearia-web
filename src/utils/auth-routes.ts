@@ -13,3 +13,7 @@ export const loginFor = (role: Role) =>
  */
 export const loginForPath = (pathname: string) =>
   pathname.startsWith('/barbeiro') ? '/barbeiro/login' : '/login'
+
+/** Home de cada perfil — usada em redirecionamentos. */
+export const homeFor = (role: Role) =>
+  role === 'BARBEIRO' ? '/barbeiro/agenda' : '/cliente/historico'

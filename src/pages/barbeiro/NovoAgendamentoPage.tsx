@@ -1,81 +1,96 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AppShell } from '../../components/layout/AppShell'
-import { TopBar } from '../../components/layout/TopBar'
-import { PanelShell } from '../../components/layout/PanelShell'
-import { Button, Input } from '../../components/ui'
-import { useIsDesktop } from '../../hooks/useMediaQuery'
-import { mockClientes, mockHorarios, mockServicos, servicoIcon } from '../../data/mock'
-import type { Cliente } from '../../types'
-import { formatCurrencyShort } from '../../utils/formatters'
-import { initials } from '../../utils/formatters'
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppShell } from "../../components/layout/AppShell";
+import { TopBar } from "../../components/layout/TopBar";
+import { PanelShell } from "../../components/layout/PanelShell";
+import { Button, Input } from "../../components/ui";
+import { useIsDesktop } from "../../hooks/useMediaQuery";
+import {
+  mockClientes,
+  mockHorarios,
+  mockServicos,
+  servicoIcon,
+} from "../../data/mock";
+import type { Cliente } from "../../types";
+import { formatCurrencyShort } from "../../utils/formatters";
+import { initials } from "../../utils/formatters";
 
 const CheckCircle = ({ on }: { on: boolean }) => (
   <div
     className={`flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border-[1.5px] ${
-      on ? 'border-brand bg-brand' : 'border-input-border bg-transparent'
+      on ? "border-brand bg-brand" : "border-input-border bg-transparent"
     }`}
   >
     {on && (
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M2.5 6.2l2.3 2.3L9.5 3.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M2.5 6.2l2.3 2.3L9.5 3.5"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     )}
   </div>
-)
+);
 
 export function NovoAgendamentoPage() {
-  const navigate = useNavigate()
-  const [step, setStep] = useState<1 | 2>(1)
+  const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
 
   // Passo 1 — cliente
-  const [busca, setBusca] = useState('')
-  const [clienteSel, setClienteSel] = useState<string | null>(null)
-  const [novoNome, setNovoNome] = useState('')
-  const [novoWhats, setNovoWhats] = useState('')
+  const [busca, setBusca] = useState("");
+  const [clienteSel, setClienteSel] = useState<string | null>(null);
+  const [novoNome, setNovoNome] = useState("");
+  const [novoWhats, setNovoWhats] = useState("");
 
   // Passo 2 — serviço e horário
-  const [servicoSel, setServicoSel] = useState<string | null>(null)
-  const [slotSel, setSlotSel] = useState<string | null>(null)
-  const [enviando, setEnviando] = useState(false)
+  const [servicoSel, setServicoSel] = useState<string | null>(null);
+  const [slotSel, setSlotSel] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
 
-  const servicosAtivos = useMemo(() => mockServicos.filter((s) => s.ativo), [])
+  const servicosAtivos = useMemo(() => mockServicos.filter((s) => s.ativo), []);
   const resultados = useMemo(
     () =>
       mockClientes.filter(
         (c) =>
-          busca.trim() === '' ||
+          busca.trim() === "" ||
           c.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          c.whatsapp.includes(busca),
+          c.telefone.includes(busca),
       ),
     [busca],
-  )
+  );
 
   const clienteEscolhido: Cliente | null =
     (clienteSel && mockClientes.find((c) => c.id === clienteSel)) ||
-    (novoNome.trim() ? { id: 'novo', nome: novoNome, whatsapp: novoWhats } : null)
+    (novoNome.trim()
+      ? { id: "novo", nome: novoNome, telefone: novoWhats }
+      : null);
 
-  const podeAvancar = !!clienteEscolhido
-  const podeConfirmar = !!servicoSel && !!slotSel
+  const podeAvancar = !!clienteEscolhido;
+  const podeConfirmar = !!servicoSel && !!slotSel;
 
   const confirmar = async () => {
-    setEnviando(true)
+    setEnviando(true);
     try {
       // TODO: integrar com API — POST /barbeiro/agendamento
-      await new Promise((r) => setTimeout(r, 600))
-      navigate('/barbeiro/agenda')
+      await new Promise((r) => setTimeout(r, 600));
+      navigate("/barbeiro/agenda");
     } finally {
-      setEnviando(false)
+      setEnviando(false);
     }
-  }
+  };
 
-  const isDesktop = useIsDesktop()
+  const isDesktop = useIsDesktop();
 
   /* ------------------------------- Desktop (D7) ------------------------------ */
   if (isDesktop) {
     return (
       <PanelShell>
-        <h2 className="mb-6 text-[26px] font-medium text-ink">Novo agendamento</h2>
+        <h2 className="mb-6 text-[26px] font-medium text-ink">
+          Novo agendamento
+        </h2>
         <div className="flex max-w-[900px] gap-9">
           {/* 1 · Cliente */}
           <div className="flex-1">
@@ -104,33 +119,39 @@ export function NovoAgendamentoPage() {
             </div>
             <div className="mb-4 flex flex-col gap-2.5">
               {resultados.map((c) => {
-                const on = clienteSel === c.id
+                const on = clienteSel === c.id;
                 return (
                   <button
                     key={c.id}
                     onClick={() => {
-                      setClienteSel(on ? null : c.id)
-                      setNovoNome('')
-                      setNovoWhats('')
+                      setClienteSel(on ? null : c.id);
+                      setNovoNome("");
+                      setNovoWhats("");
                     }}
                     className={`flex items-center gap-3 rounded-card border-[1.5px] p-3 text-left transition-colors ${
-                      on ? 'border-brand bg-brand-tint shadow-card' : 'border-line bg-surface shadow-card'
+                      on
+                        ? "border-brand bg-brand-tint shadow-card"
+                        : "border-line bg-surface shadow-card"
                     }`}
                   >
                     <div
                       className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg text-[14px] font-bold ${
-                        on ? 'bg-brand text-white' : 'bg-brand-tint text-brand'
+                        on ? "bg-brand text-white" : "bg-brand-tint text-brand"
                       }`}
                     >
                       {initials(c.nome)}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-semibold text-ink">{c.nome}</div>
-                      <div className="text-[11.5px] text-muted">{c.whatsapp}</div>
+                      <div className="text-[14px] font-semibold text-ink">
+                        {c.nome}
+                      </div>
+                      <div className="text-[11.5px] text-muted">
+                        {c.telefone}
+                      </div>
                     </div>
                     <CheckCircle on={on} />
                   </button>
-                )
+                );
               })}
             </div>
             <div className="mb-4 flex items-center gap-3">
@@ -146,8 +167,8 @@ export function NovoAgendamentoPage() {
                 placeholder="Nome do cliente"
                 value={novoNome}
                 onChange={(e) => {
-                  setNovoNome(e.target.value)
-                  setClienteSel(null)
+                  setNovoNome(e.target.value);
+                  setClienteSel(null);
                 }}
               />
               <Input
@@ -167,27 +188,31 @@ export function NovoAgendamentoPage() {
             </div>
             <div className="mb-4 flex flex-col gap-2.5">
               {servicosAtivos.map((s) => {
-                const on = servicoSel === s.id
+                const on = servicoSel === s.id;
                 return (
                   <button
                     key={s.id}
                     onClick={() => setServicoSel(s.id)}
                     className={`flex items-center gap-3 rounded-card border-[1.5px] p-3.5 text-left transition-colors ${
-                      on ? 'border-brand bg-brand-tint shadow-card' : 'border-line bg-surface shadow-card'
+                      on
+                        ? "border-brand bg-brand-tint shadow-card"
+                        : "border-line bg-surface shadow-card"
                     }`}
                   >
-                    <span className="flex-1 text-[14.5px] font-semibold text-ink">{s.nome}</span>
+                    <span className="flex-1 text-[14.5px] font-semibold text-ink">
+                      {s.nome}
+                    </span>
                     <span className="text-[14.5px] font-semibold text-ink">
                       {formatCurrencyShort(s.preco)}
                     </span>
                     <CheckCircle on={on} />
                   </button>
-                )
+                );
               })}
             </div>
             <div className="mb-5 grid grid-cols-4 gap-2">
               {mockHorarios.map((h) => {
-                const on = slotSel === h.hora && h.disponivel
+                const on = slotSel === h.hora && h.disponivel;
                 return (
                   <button
                     key={h.hora}
@@ -195,15 +220,15 @@ export function NovoAgendamentoPage() {
                     onClick={() => setSlotSel(h.hora)}
                     className={`rounded-field border-[1.5px] py-[13px] text-center text-[14px] font-semibold transition-colors ${
                       !h.disponivel
-                        ? 'cursor-not-allowed border-transparent bg-line text-placeholder line-through'
+                        ? "cursor-not-allowed border-transparent bg-line text-placeholder line-through"
                         : on
-                          ? 'border-brand bg-brand text-white'
-                          : 'border-input-border bg-surface text-ink hover:border-ink'
+                          ? "border-brand bg-brand text-white"
+                          : "border-input-border bg-surface text-ink hover:border-ink"
                     }`}
                   >
                     {h.hora}
                   </button>
-                )
+                );
               })}
             </div>
             <Button
@@ -217,7 +242,7 @@ export function NovoAgendamentoPage() {
           </div>
         </div>
       </PanelShell>
-    )
+    );
   }
 
   /* --------------------------- Mobile (2.3 / 2.4) ---------------------------- */
@@ -232,12 +257,14 @@ export function NovoAgendamentoPage() {
             Passo {step} de 2
           </span>
           <span className="text-[12.5px] text-muted">
-            · {step === 1 ? 'Cliente' : 'Serviço e horário'}
+            · {step === 1 ? "Cliente" : "Serviço e horário"}
           </span>
         </div>
         <div className="flex gap-[5px]">
           <div className="h-1 flex-1 rounded bg-brand" />
-          <div className={`h-1 flex-1 rounded ${step === 2 ? 'bg-brand' : 'bg-line-3'}`} />
+          <div
+            className={`h-1 flex-1 rounded ${step === 2 ? "bg-brand" : "bg-line-3"}`}
+          />
         </div>
       </div>
 
@@ -269,36 +296,42 @@ export function NovoAgendamentoPage() {
           </div>
           <div className="mb-5 flex flex-col gap-2.5">
             {resultados.length === 0 && (
-              <p className="text-[13px] text-muted">Nenhum cliente encontrado.</p>
+              <p className="text-[13px] text-muted">
+                Nenhum cliente encontrado.
+              </p>
             )}
             {resultados.map((c) => {
-              const on = clienteSel === c.id
+              const on = clienteSel === c.id;
               return (
                 <button
                   key={c.id}
                   onClick={() => {
-                    setClienteSel(on ? null : c.id)
-                    setNovoNome('')
-                    setNovoWhats('')
+                    setClienteSel(on ? null : c.id);
+                    setNovoNome("");
+                    setNovoWhats("");
                   }}
                   className={`flex items-center gap-3 rounded-card border-[1.5px] p-3 text-left transition-colors ${
-                    on ? 'border-brand bg-brand-tint shadow-card' : 'border-line bg-surface shadow-card'
+                    on
+                      ? "border-brand bg-brand-tint shadow-card"
+                      : "border-line bg-surface shadow-card"
                   }`}
                 >
                   <div
                     className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-lg text-[14px] font-bold ${
-                      on ? 'bg-brand text-white' : 'bg-brand-tint text-brand'
+                      on ? "bg-brand text-white" : "bg-brand-tint text-brand"
                     }`}
                   >
                     {initials(c.nome)}
                   </div>
                   <div className="flex-1">
-                    <div className="text-[14.5px] font-semibold text-ink">{c.nome}</div>
-                    <div className="text-[12px] text-muted">{c.whatsapp}</div>
+                    <div className="text-[14.5px] font-semibold text-ink">
+                      {c.nome}
+                    </div>
+                    <div className="text-[12px] text-muted">{c.telefone}</div>
                   </div>
                   <CheckCircle on={on} />
                 </button>
-              )
+              );
             })}
           </div>
 
@@ -316,8 +349,8 @@ export function NovoAgendamentoPage() {
               placeholder="Nome do cliente"
               value={novoNome}
               onChange={(e) => {
-                setNovoNome(e.target.value)
-                setClienteSel(null)
+                setNovoNome(e.target.value);
+                setClienteSel(null);
               }}
             />
             <Input
@@ -328,7 +361,8 @@ export function NovoAgendamentoPage() {
               onChange={(e) => setNovoWhats(e.target.value)}
             />
             <p className="text-[12px] leading-relaxed text-muted">
-              Sem senha por agora. O cliente pode criar uma conta depois para ver o histórico.
+              Sem senha por agora. O cliente pode criar uma conta depois para
+              ver o histórico.
             </p>
           </div>
         </div>
@@ -337,13 +371,15 @@ export function NovoAgendamentoPage() {
           {/* Cliente escolhido */}
           <div className="mb-5 flex items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-tint text-[12px] font-bold text-brand">
-              {initials(clienteEscolhido?.nome ?? '')}
+              {initials(clienteEscolhido?.nome ?? "")}
             </div>
             <div className="flex-1">
               <div className="text-[10.5px] font-semibold uppercase tracking-[0.4px] text-muted">
                 Cliente
               </div>
-              <div className="text-[13.5px] font-semibold text-ink">{clienteEscolhido?.nome}</div>
+              <div className="text-[13.5px] font-semibold text-ink">
+                {clienteEscolhido?.nome}
+              </div>
             </div>
             <button
               onClick={() => setStep(1)}
@@ -358,25 +394,31 @@ export function NovoAgendamentoPage() {
           </div>
           <div className="mb-5 flex flex-col gap-2.5">
             {servicosAtivos.map((s) => {
-              const on = servicoSel === s.id
+              const on = servicoSel === s.id;
               return (
                 <button
                   key={s.id}
                   onClick={() => setServicoSel(s.id)}
                   className={`flex items-center gap-3 rounded-card border-[1.5px] p-[15px] text-left transition-colors ${
-                    on ? 'border-brand bg-brand-tint shadow-card' : 'border-line bg-surface shadow-card'
+                    on
+                      ? "border-brand bg-brand-tint shadow-card"
+                      : "border-line bg-surface shadow-card"
                   }`}
                 >
                   <div
                     className={`flex h-11 w-11 flex-none items-center justify-center rounded-lg text-xl ${
-                      on ? 'bg-brand-tint-2' : 'bg-screen'
+                      on ? "bg-brand-tint-2" : "bg-screen"
                     }`}
                   >
                     {servicoIcon(s.id)}
                   </div>
                   <div className="flex-1">
-                    <span className="text-[15px] font-semibold text-ink">{s.nome}</span>
-                    <div className="mt-0.5 text-[12px] text-muted">{s.duracaoMinutos} min</div>
+                    <span className="text-[15px] font-semibold text-ink">
+                      {s.nome}
+                    </span>
+                    <div className="mt-0.5 text-[12px] text-muted">
+                      {s.duracaoMinutos} min
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <span className="text-[15px] font-semibold text-ink">
@@ -385,7 +427,7 @@ export function NovoAgendamentoPage() {
                     <CheckCircle on={on} />
                   </div>
                 </button>
-              )
+              );
             })}
           </div>
 
@@ -394,7 +436,7 @@ export function NovoAgendamentoPage() {
           </div>
           <div className="grid grid-cols-3 gap-2.5">
             {mockHorarios.map((h) => {
-              const on = slotSel === h.hora && h.disponivel
+              const on = slotSel === h.hora && h.disponivel;
               return (
                 <button
                   key={h.hora}
@@ -402,15 +444,15 @@ export function NovoAgendamentoPage() {
                   onClick={() => setSlotSel(h.hora)}
                   className={`rounded-field border-[1.5px] py-[13px] text-center text-[14px] font-semibold transition-colors ${
                     !h.disponivel
-                      ? 'cursor-not-allowed border-transparent bg-line text-placeholder line-through'
+                      ? "cursor-not-allowed border-transparent bg-line text-placeholder line-through"
                       : on
-                        ? 'border-brand bg-brand text-white'
-                        : 'border-input-border bg-surface text-ink hover:border-ink'
+                        ? "border-brand bg-brand text-white"
+                        : "border-input-border bg-surface text-ink hover:border-ink"
                   }`}
                 >
                   {h.hora}
                 </button>
-              )
+              );
             })}
           </div>
         </div>
@@ -419,7 +461,11 @@ export function NovoAgendamentoPage() {
       {/* Rodapé fixo */}
       <div className="sticky bottom-0 flex-none border-t border-line bg-surface px-5 pb-6 pt-3.5 shadow-[0_-2px_8px_rgba(26,26,26,.04)]">
         {step === 1 ? (
-          <Button className="w-full" disabled={!podeAvancar} onClick={() => setStep(2)}>
+          <Button
+            className="w-full"
+            disabled={!podeAvancar}
+            onClick={() => setStep(2)}
+          >
             Continuar
           </Button>
         ) : (
@@ -434,5 +480,5 @@ export function NovoAgendamentoPage() {
         )}
       </div>
     </AppShell>
-  )
+  );
 }

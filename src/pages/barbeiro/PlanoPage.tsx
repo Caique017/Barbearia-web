@@ -41,7 +41,9 @@ function resumo(a: Assinatura) {
         texto:
           a.formaPagamento === 'PIX'
             ? `Pago no Pix até ${dataLonga(ate)} (${dias}). Avisamos por e-mail 3 dias antes.`
-            : `Renova sozinha no cartão. Período atual até ${dataLonga(ate)}.`,
+            : a.cancelamentoAgendado
+              ? `Cancelamento agendado. O acesso vale até ${dataLonga(ate)} e o cartão não será cobrado de novo.`
+              : `Renova sozinha no cartão. Período atual até ${dataLonga(ate)}.`,
         cor: 'text-brand',
       }
   }

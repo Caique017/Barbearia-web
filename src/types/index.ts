@@ -188,6 +188,7 @@ export interface Assinatura {
   diasRestantes: number;
   formaPagamento: FormaPagamento | null;
   precoMensal: number;
+  cancelamentoAgendado: boolean;
 }
 
 /* ---------------------------------- Auth --------------------------------- */

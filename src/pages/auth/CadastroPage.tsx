@@ -10,6 +10,8 @@ import { authApi } from "../../api/auth";
 import { apiErrorMessage, apiFieldErrors } from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
 import type { BarbeariaPublica } from "../../types";
+import { AceiteTermos } from "../../components/conta/AceiteTermos";
+import { RodapeLegal } from "../../components/layout/RodapeLegal";
 
 const schema = z
   .object({
@@ -27,6 +29,10 @@ const schema = z
       .min(8, "Mínimo de 8 caracteres")
       .max(64, "Máximo de 64 caracteres"),
     confirmar: z.string().min(1, "Repita a senha"),
+    aceiteTermos: z
+      .boolean()
+      .refine((v) => v, "Confirme que tem 18 anos ou mais e aceite os termos"),
+    aceiteMarketing: z.boolean(),
   })
   .refine((d) => d.senha === d.confirmar, {
     path: ["confirmar"],
@@ -46,7 +52,10 @@ export function CadastroPage() {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { aceiteTermos: false, aceiteMarketing: false },
+  });
 
   useEffect(() => {
     if (!slug) return;
@@ -75,6 +84,8 @@ export function CadastroPage() {
         email: data.email,
         telefone: data.telefone,
         senha: data.senha,
+        aceiteTermos: data.aceiteTermos,
+        aceiteMarketing: data.aceiteMarketing,
         barbeiroId: barbearia.barbeiroId,
       });
       // A conta existe e o token vale nos dois casos — o que fica pendente é o vínculo.
@@ -216,6 +227,11 @@ export function CadastroPage() {
             <p className="text-[12px] text-muted">
               Seu e-mail será usado para login.
             </p>
+            <AceiteTermos
+              termos={register("aceiteTermos")}
+              marketing={register("aceiteMarketing")}
+              erro={errors.aceiteTermos?.message}
+            />
             {erro && (
               <p className="rounded-field bg-danger-tint-2 px-3 py-2 text-[13px] text-danger">
                 {erro}
@@ -237,6 +253,7 @@ export function CadastroPage() {
               Entrar
             </Link>
           </div>
+          <RodapeLegal className="mt-6" />
         </div>
       </div>
     </div>

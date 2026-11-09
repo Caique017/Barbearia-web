@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AppShell } from "../../components/layout/AppShell";
+import { RodapeLegal } from "../../components/layout/RodapeLegal";
 import { Logo } from "../../components/layout/Logo";
 import { Button, Input } from "../../components/ui";
 import { authApi } from "../../api/auth";
@@ -43,11 +43,23 @@ export function BarbeiroLoginPage() {
   });
 
   return (
-    <AppShell className="bg-surface-dark">
-      <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-[26px] py-6">
+    <div className="flex min-h-dvh w-full bg-surface-dark">
+      <div className="relative hidden flex-1 overflow-hidden border-r border-white/10 lg:block">
+        <div className="absolute right-[64px] top-[60px] h-[180px] w-[34px] bg-brand [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)]" />
+        <div className="absolute right-[24px] top-[60px] h-[180px] w-[34px] bg-brand-light [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)]" />
+        <div className="absolute bottom-16 left-14 right-14">
+          <h2 className="max-w-[440px] text-[34px] font-medium leading-tight text-white">
+            Agenda, clientes e caixa da sua barbearia num lugar só
+          </h2>
+          <p className="mt-3 max-w-[400px] text-[15px] leading-relaxed text-white/60">
+            Seus clientes agendam pelo seu link; você acompanha o dia e o lucro real.
+          </p>
+        </div>
+      </div>
+      <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col justify-center overflow-hidden px-[26px] py-6 lg:mx-0 lg:max-w-[520px] lg:flex-none lg:px-[60px]">
         {/* Chevrons decorativos */}
-        <div className="absolute right-[52px] top-[70px] h-[150px] w-[30px] bg-brand [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)]" />
-        <div className="absolute right-4 top-[70px] h-[150px] w-[30px] bg-brand-light [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)]" />
+        <div className="absolute right-[52px] top-[70px] h-[150px] w-[30px] bg-brand [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)] lg:hidden" />
+        <div className="absolute right-4 top-[70px] h-[150px] w-[30px] bg-brand-light [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)] lg:hidden" />
 
         <div className="relative">
           <div className="mb-7">
@@ -118,8 +130,9 @@ export function BarbeiroLoginPage() {
               Criar conta
             </Link>
           </p>
+          <RodapeLegal escuro className="mt-8" />
         </div>
       </div>
-    </AppShell>
+    </div>
   );
 }

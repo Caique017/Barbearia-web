@@ -1,3 +1,4 @@
+import { SecaoPrivacidade } from '../../components/conta/SecaoPrivacidade'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -421,6 +422,7 @@ export function PerfilPage() {
       <SecaoLink perfil={perfil} onSalvo={setDados} />
       <SecaoHorarios />
       <SecaoBloqueios />
+      <SecaoPrivacidade role="BARBEIRO" />
       <Card className="flex items-center justify-between p-5">
         <div>
           <div className="text-[16px] font-semibold text-ink">Plano</div>

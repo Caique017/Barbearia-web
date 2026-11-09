@@ -209,6 +209,8 @@ export interface BarbeiroCadastroRequest {
   horarioFuncionamento?: string;
   email: string;
   senha: string;
+  aceiteTermos: boolean;
+  aceiteMarketing: boolean;
 }
 
 export interface ClienteCadastroRequest {
@@ -216,6 +218,8 @@ export interface ClienteCadastroRequest {
   telefone: string;
   email: string;
   senha: string;
+  aceiteTermos: boolean;
+  aceiteMarketing: boolean;
   barbeiroId: string;
 }
 
@@ -262,4 +266,10 @@ export interface ErroResposta {
   mensagem: string;
   caminho: string;
   campos?: CampoErro[];
+}
+
+/* ------------------------------ Conta (LGPD) ----------------------------- */
+export interface Preferencias {
+  marketing: boolean;
+  lembretes: boolean;
 }

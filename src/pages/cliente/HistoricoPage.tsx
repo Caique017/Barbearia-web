@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
+import { RodapeLegal } from '../../components/layout/RodapeLegal'
+import { SecaoPrivacidade } from '../../components/conta/SecaoPrivacidade'
 import { Header } from '../../components/layout/Header'
 import { Badge, Button, Carregando, ErroCarregar, Modal, Vazio } from '../../components/ui'
 import { useAuth } from '../../hooks/useAuth'
@@ -55,7 +57,7 @@ export function HistoricoPage() {
   }
 
   return (
-    <AppShell className="bg-screen">
+    <AppShell className="bg-screen" largo>
       <Header />
 
       <div className="flex flex-1 flex-col gap-4 px-[22px] pb-4 pt-1">
@@ -71,7 +73,7 @@ export function HistoricoPage() {
         ) : (
           <>
             {/* Resumo — total de cortes + total gasto */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <div className="rounded-card border border-line bg-surface p-4 shadow-card">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.5px] text-muted">Cortes</div>
                 <div className="mt-1.5 text-[28px] font-semibold leading-none text-ink">{totalCortes}</div>
@@ -129,7 +131,7 @@ export function HistoricoPage() {
               {anteriores.length === 0 ? (
                 <Vazio icone="✂️" titulo="Nada por aqui ainda" dica="Seus atendimentos aparecem aqui." />
               ) : (
-                <div className="flex flex-col gap-2.5">
+                <div className="grid gap-2.5 lg:grid-cols-2">
                   {anteriores.map((a) => (
                     <div
                       key={a.id}
@@ -153,6 +155,8 @@ export function HistoricoPage() {
             </div>
           </>
         )}
+        <SecaoPrivacidade role="CLIENTE" />
+        <RodapeLegal className="mt-2" />
       </div>
 
       <div className="sticky bottom-0 flex-none border-t border-line bg-surface px-5 pb-6 pt-3.5 shadow-[0_-2px_8px_rgba(26,26,26,.04)]">

@@ -9,6 +9,8 @@ import { Button, Card, Input } from '../../components/ui'
 import { authApi } from '../../api/auth'
 import { apiErrorMessage, apiFieldErrors } from '../../api/axios'
 import { useAuth } from '../../hooks/useAuth'
+import { AceiteTermos } from '../../components/conta/AceiteTermos'
+import { RodapeLegal } from '../../components/layout/RodapeLegal'
 
 // Espelha as restrições de BarbeiroCadastroRequest, para o barbeiro saber antes de enviar.
 const schema = z
@@ -26,6 +28,8 @@ const schema = z
       .min(8, 'Mínimo de 8 caracteres')
       .max(64, 'Máximo de 64 caracteres'),
     confirmar: z.string().min(1, 'Repita a senha'),
+    aceiteTermos: z.boolean().refine((v) => v, 'Confirme que tem 18 anos ou mais e aceite os termos'),
+    aceiteMarketing: z.boolean(),
   })
   .refine((d) => d.senha === d.confirmar, {
     path: ['confirmar'],
@@ -44,7 +48,10 @@ export function BarbeiroCadastroPage() {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { aceiteTermos: false, aceiteMarketing: false },
+  })
 
   const onSubmit = handleSubmit(async (data) => {
     setErro(null)
@@ -56,6 +63,8 @@ export function BarbeiroCadastroPage() {
         horarioFuncionamento: data.horarioFuncionamento.trim() || undefined,
         email: data.email,
         senha: data.senha,
+        aceiteTermos: data.aceiteTermos,
+        aceiteMarketing: data.aceiteMarketing,
       })
       await login(res.token)
       // Mostra o link antes de navegar: é o que o barbeiro vai mandar aos clientes.
@@ -71,7 +80,7 @@ export function BarbeiroCadastroPage() {
   if (slug) {
     const link = `${window.location.origin}/b/${slug}`
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8 lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:rounded-card lg:border lg:border-line lg:px-10 lg:py-10 lg:shadow-card">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.9px] text-brand">
           Barbearia criada
         </div>
@@ -186,6 +195,12 @@ export function BarbeiroCadastroPage() {
               {...register('confirmar')}
             />
 
+            <AceiteTermos
+              termos={register('aceiteTermos')}
+              marketing={register('aceiteMarketing')}
+              erro={errors.aceiteTermos?.message}
+            />
+
             {erro && (
               <p className="rounded-field bg-danger-tint-2 px-3 py-2 text-[13px] text-danger">
                 {erro}
@@ -203,6 +218,7 @@ export function BarbeiroCadastroPage() {
               Entrar
             </Link>
           </div>
+          <RodapeLegal className="mt-6" />
         </div>
       </div>
     </div>

@@ -5,6 +5,8 @@ import { Button, Card, Spinner } from '../../components/ui'
 import { authApi } from '../../api/auth'
 import { apiErrorMessage } from '../../api/axios'
 import type { BarbeariaPublica } from '../../types'
+import { useAuth } from '../../hooks/useAuth'
+import { RodapeLegal } from '../../components/layout/RodapeLegal'
 
 /**
  * Página do link público da barbearia — é por aqui que o cliente chega.
@@ -14,6 +16,8 @@ export function BarbeariaPage() {
   const { slug } = useParams<{ slug: string }>()
   const [barbearia, setBarbearia] = useState<BarbeariaPublica | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const { usuario } = useAuth()
+  const ehCliente = usuario?.role === 'CLIENTE'
 
   useEffect(() => {
     if (!slug) return
@@ -51,7 +55,7 @@ export function BarbeariaPage() {
     )
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-screen">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-screen lg:my-[8vh] lg:min-h-0 lg:max-w-[560px] lg:overflow-hidden lg:rounded-card lg:border lg:border-line lg:shadow-card">
       {/* Cabeçalho de marca */}
       <div className="relative flex-none overflow-hidden bg-ink px-[22px] pb-7 pt-8 text-white">
         <div className="absolute right-[52px] top-0 h-[120px] w-[26px] bg-brand [clip-path:polygon(0_0,100%_0,55%_100%,-45%_100%)]" />
@@ -70,8 +74,9 @@ export function BarbeariaPage() {
           {barbearia.nome}
         </h1>
         <p className="mb-5 text-[14px] leading-relaxed text-ink-2">
-          Crie sua conta para agendar em segundos e guardar seu histórico de
-          cortes.
+          {ehCliente
+            ? 'Escolha o serviço e o horário que preferir.'
+            : 'Crie sua conta para agendar em segundos e guardar seu histórico de cortes.'}
         </p>
 
         {/* O horário é opcional na API — só mostra se o barbeiro informou. */}
@@ -86,15 +91,24 @@ export function BarbeariaPage() {
           </Card>
         )}
 
-        <Link to={`/b/${slug}/cadastro`} className="block">
-          <Button className="w-full">Criar minha conta</Button>
-        </Link>
-
-        <div className="mt-5 border-t border-line pt-4 text-center">
-          <Link to="/login" className="text-[13.5px] font-semibold text-brand">
-            Já tenho conta
+        {ehCliente ? (
+          <Link to="/cliente/agendar" className="block">
+            <Button className="w-full">Agendar horário</Button>
           </Link>
-        </div>
+        ) : (
+          <>
+            <Link to={`/b/${slug}/cadastro`} className="block">
+              <Button className="w-full">Criar minha conta</Button>
+            </Link>
+
+            <div className="mt-5 border-t border-line pt-4 text-center">
+              <Link to="/login" className="text-[13.5px] font-semibold text-brand">
+                Já tenho conta
+              </Link>
+            </div>
+          </>
+        )}
+        <RodapeLegal className="mt-8" />
       </div>
     </div>
   )

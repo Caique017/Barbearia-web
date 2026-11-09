@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
 import { PanelShell } from '../../components/layout/PanelShell'
 import { TopBar } from '../../components/layout/TopBar'
@@ -10,6 +10,7 @@ import { assinaturaApi } from '../../api/assinatura'
 import { apiErrorMessage } from '../../api/axios'
 import type { Assinatura, FormaPagamento } from '../../types'
 import { formatCurrency } from '../../utils/formatters'
+import { CONTATO } from '../../utils/legal'
 
 const dataLonga = (iso: string) =>
   new Date(iso).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -106,7 +107,7 @@ export function PlanoPage() {
               </div>
               <ul className="m-0 mt-4 flex list-none flex-col gap-1.5 p-0 text-[13px] text-white/75">
                 <li>✓ Agenda, link público e horários livres</li>
-                <li>✓ Carteira de clientes e lembretes no WhatsApp</li>
+                <li>✓ Carteira de clientes e lembrete pronto para mandar no WhatsApp</li>
                 <li>✓ Financeiro com lucro real e mix de serviços</li>
               </ul>
             </div>
@@ -126,9 +127,27 @@ export function PlanoPage() {
               >
                 Pagar 1 mês no Pix
               </Button>
-              <p className="m-0 text-center text-[12px] leading-relaxed text-muted">
-                Cartão renova sozinho todo mês. Pix libera 30 dias, somados ao que ainda resta.
-              </p>
+              <div className="rounded-field bg-brand-soft px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-2">
+                <p className="m-0">
+                  <strong>Cartão:</strong> renovação automática todo mês, no mesmo dia, por{' '}
+                  {formatCurrency(a.precoMensal)}, até você cancelar. Cancele quando quiser em "Gerenciar
+                  pagamento", sem multa.
+                </p>
+                <p className="m-0 mt-1.5">
+                  <strong>Pix:</strong> libera 30 dias, somados ao que ainda resta. Não renova sozinho.
+                </p>
+                <p className="m-0 mt-1.5">
+                  Sem taxas extras. Desistiu em até 7 dias do pagamento? Devolvemos tudo, é só pedir por{' '}
+                  <a href={`mailto:${CONTATO}`} className="font-semibold text-brand">
+                    e-mail
+                  </a>
+                  . Veja os{' '}
+                  <Link to="/termos" className="font-semibold text-brand">
+                    Termos de Uso
+                  </Link>
+                  .
+                </p>
+              </div>
             </>
           )}
 

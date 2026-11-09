@@ -17,6 +17,9 @@ import { PerfilPage } from "../pages/barbeiro/PerfilPage";
 import { PlanoPage } from "../pages/barbeiro/PlanoPage";
 import { AgendamentoPage } from "../pages/cliente/AgendamentoPage";
 import { HistoricoPage } from "../pages/cliente/HistoricoPage";
+import { TermosPage } from "../pages/legal/TermosPage";
+import { PrivacidadePage } from "../pages/legal/PrivacidadePage";
+import { DescadastroPage } from "../pages/publico/DescadastroPage";
 
 export function AppRoutes() {
   return (
@@ -31,6 +34,10 @@ export function AppRoutes() {
       {/* Destino do link que a API manda por e-mail: /redefinir-senha?token=... */}
       <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
       <Route path="/b/:slug" element={<BarbeariaPage />} />
+      <Route path="/termos" element={<TermosPage />} />
+      <Route path="/privacidade" element={<PrivacidadePage />} />
+      {/* Destino do link "parar de receber" dos e-mails: /descadastro?token=... */}
+      <Route path="/descadastro" element={<DescadastroPage />} />
       <Route path="/b/:slug/cadastro" element={<CadastroPage />} />
       {/* Agendar online exige conta: o fluxo é o do cliente logado. */}
       <Route path="/agendar" element={<Navigate to="/cliente/agendar" replace />} />

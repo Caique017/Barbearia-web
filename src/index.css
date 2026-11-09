@@ -4,7 +4,7 @@
    Design tokens — extracted from "Barbearia - Telas" (Claude Design)
    ============================================================ */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, Arial, sans-serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, Arial, sans-serif;
 
   /* Brand */
   --color-brand: #024ad8;

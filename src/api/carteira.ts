@@ -15,4 +15,7 @@ export const carteiraApi = {
 
   recusarVinculo: (id: string) =>
     api.delete<void>(`/clientes/${id}/vinculo`).then(() => undefined),
+
+  anonimizar: (id: string) =>
+    api.post<Cliente>(`/clientes/${id}/anonimizar`).then((r) => r.data),
 }

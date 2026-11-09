@@ -1,3 +1,4 @@
+import { RodapeLegal } from "../../components/layout/RodapeLegal";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -132,6 +133,7 @@ export function LoginPage() {
             </Link>
           </p>
         </div>
+        <RodapeLegal className="mt-6" />
       </div>
     </div>
   );

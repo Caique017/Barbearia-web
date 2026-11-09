@@ -42,7 +42,7 @@ export function EsqueciSenhaPage() {
 
   if (enviado)
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8 lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:rounded-card lg:border lg:border-line lg:px-10 lg:py-10 lg:shadow-card">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.9px] text-brand">
           Verifique seu e-mail
         </div>
@@ -65,7 +65,7 @@ export function EsqueciSenhaPage() {
     )
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-screen">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-screen lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:overflow-hidden lg:rounded-card lg:border lg:border-line lg:pb-4 lg:shadow-card">
       <TopBar to={voltarPara} />
       <div className="flex flex-1 flex-col px-[22px] pb-7 pt-3">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.9px] text-brand">

@@ -25,6 +25,7 @@ export function ClientesPage() {
   const [salvando, setSalvando] = useState(false)
   const [ocupado, setOcupado] = useState<string | null>(null)
   const [erroLista, setErroLista] = useState<string | null>(null)
+  const [confirmarAnonimizar, setConfirmarAnonimizar] = useState(false)
 
   const pedidos = clientes.filter((c) => c.pedidoVinculo)
   const filtrados = useMemo(() => {
@@ -48,8 +49,9 @@ export function ClientesPage() {
   const abrirEdicao = (c: Cliente) => {
     setEditando(c)
     setNome(c.nome)
-    setTelefone(formatTelefone(c.telefone))
+    setTelefone(anonimizado(c) ? '' : formatTelefone(c.telefone))
     setErroForm(null)
+    setConfirmarAnonimizar(false)
     setModalOpen(true)
   }
 
@@ -66,6 +68,20 @@ export function ClientesPage() {
         const novo = await carteiraApi.cadastrar(corpo)
         setDados((prev) => [novo, ...(prev ?? [])])
       }
+      setModalOpen(false)
+    } catch (e) {
+      setErroForm(apiErrorMessage(e))
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const anonimizar = async () => {
+    if (!editando) return
+    setSalvando(true)
+    setErroForm(null)
+    try {
+      trocar(await carteiraApi.anonimizar(editando.id))
       setModalOpen(false)
     } catch (e) {
       setErroForm(apiErrorMessage(e))
@@ -111,6 +127,25 @@ export function ClientesPage() {
         <Button className="mt-1 w-full" loading={salvando} onClick={salvar}>
           {editando ? 'Salvar alterações' : 'Cadastrar cliente'}
         </Button>
+        {editando && !anonimizado(editando) && (
+          <div className="mt-2 border-t border-line pt-3">
+            {confirmarAnonimizar ? (
+              <>
+                <p className="m-0 mb-2.5 text-[12.5px] leading-relaxed text-ink-2">
+                  O nome e o telefone somem, a conta dele no ClipBook é apagada e os horários futuros são
+                  cancelados. O histórico e o caixa continuam, sem identificar a pessoa. Não dá para desfazer.
+                </p>
+                <Button variant="destructive" className="w-full" loading={salvando} onClick={anonimizar}>
+                  Confirmar anonimização
+                </Button>
+              </>
+            ) : (
+              <Button variant="destructiveOutline" className="w-full" onClick={() => setConfirmarAnonimizar(true)}>
+                Anonimizar cliente (LGPD)
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </Modal>
   )
@@ -196,7 +231,7 @@ export function ClientesPage() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-[14.5px] font-semibold text-ink">{c.nome}</div>
-              <div className="text-[12px] text-muted">{formatTelefone(c.telefone)}</div>
+              <div className="text-[12px] text-muted">{anonimizado(c) ? 'Dados removidos' : formatTelefone(c.telefone)}</div>
             </div>
             {c.temConta && (
               <span className="rounded-lg bg-brand-tint-2 px-2 py-[3px] text-[10px] font-bold text-brand-hover">
@@ -254,4 +289,8 @@ export function ClientesPage() {
       {modal}
     </AppShell>
   )
+}
+
+function anonimizado(c: Cliente) {
+  return c.telefone.startsWith('removido-')
 }

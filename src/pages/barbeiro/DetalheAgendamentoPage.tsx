@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import type { ReactNode } from "react";
 import { AppShell } from "../../components/layout/AppShell";
+import { PanelShell } from "../../components/layout/PanelShell";
+import { useIsDesktop } from "../../hooks/useMediaQuery";
 import { TopBar } from "../../components/layout/TopBar";
 import { Badge, Button, Carregando, ErroCarregar, Input, Modal } from "../../components/ui";
 import { useCarregar } from "../../hooks/useCarregar";
@@ -44,14 +47,14 @@ export function DetalheAgendamentoPage() {
 
   if (!ag) {
     return (
-      <AppShell className="bg-screen">
+      <Moldura>
         <TopBar title="Detalhes" to="/barbeiro/agenda" />
         {carregando ? (
           <Carregando />
         ) : (
           <ErroCarregar mensagem={erro ?? "Agendamento não encontrado."} onTentar={recarregar} />
         )}
-      </AppShell>
+      </Moldura>
     );
   }
 
@@ -94,7 +97,7 @@ export function DetalheAgendamentoPage() {
     });
 
   return (
-    <AppShell className="bg-screen">
+    <Moldura>
       <TopBar title="Detalhes" to="/barbeiro/agenda" />
 
       <div className="flex flex-1 flex-col px-[22px] pb-6 pt-2">
@@ -277,6 +280,20 @@ export function DetalheAgendamentoPage() {
           Voltar
         </Button>
       </Modal>
-    </AppShell>
+    </Moldura>
   );
+}
+
+function Moldura({ children }: { children: ReactNode }) {
+  const isDesktop = useIsDesktop();
+  if (isDesktop) {
+    return (
+      <PanelShell>
+        <div className="flex max-w-[640px] flex-col overflow-hidden rounded-card border border-line bg-screen shadow-card">
+          {children}
+        </div>
+      </PanelShell>
+    );
+  }
+  return <AppShell className="bg-screen">{children}</AppShell>;
 }

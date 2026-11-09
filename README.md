@@ -4,11 +4,11 @@ Front-end do **ClipBook**, sistema de agendamento e gestão para o **barbeiro qu
 
 - O cliente agenda pelo link público da barbearia.
 - O barbeiro cuida da agenda, dos clientes e dos serviços, e vê o lucro real do mês.
-- O sistema reduz as faltas com lembrete no WhatsApp e mostra faturamento, custo de insumos, lucro líquido e o mix de serviços.
+- O barbeiro manda o lembrete do horário pelo WhatsApp com um toque (mensagem já escrita) e vê faturamento, custo de insumos, lucro líquido e o mix de serviços.
 
 A API fica em [Caique017/Barbearia](https://github.com/Caique017/Barbearia).
 
-> **Status (out/2026):** todas as telas estão ligadas à API, sem nenhum dado de mentira, e foram conferidas no navegador contra a API local. O CI roda em todo PR. O deploy na AWS (S3 + CloudFront) está pronto e espera a infraestrutura ser criada.
+> **Status (nov/2026):** todas as telas estão ligadas à API, sem nenhum dado de mentira. Agora com **LGPD** (Termos, Política de Privacidade, aceite no cadastro, aviso de cookies, baixar e excluir os dados, anonimizar cliente) e **layout de desktop em todas as telas**. O CI roda em todo PR, com smoke test no navegador. O deploy na AWS (S3 + CloudFront) está pronto; a primeira subida está planejada para nov/2026.
 
 ---
 
@@ -22,6 +22,7 @@ A API fica em [Caique017/Barbearia](https://github.com/Caique017/Barbearia).
 - [Como o front conversa com a API](#como-o-front-conversa-com-a-api)
 - [Design](#design)
 - [Segurança](#segurança)
+- [Privacidade e consumidor (LGPD e CDC)](#privacidade-e-consumidor-lgpd-e-cdc)
 - [CI/CD](#cicd)
 - [Limitações conhecidas](#limitações-conhecidas)
 
@@ -29,7 +30,7 @@ A API fica em [Caique017/Barbearia](https://github.com/Caique017/Barbearia).
 
 ## Telas
 
-Cada tela tem layout de **celular** (coluna de 430px com barra inferior) e de **desktop** (a partir de 1024px, com barra lateral).
+Cada tela tem layout de **celular** (coluna de 430px com barra inferior) e de **desktop** (a partir de 1024px): o painel do barbeiro com barra lateral, os logins com painel da marca ao lado, e as telas de senha, cadastro concluído e página da barbearia como cartão centralizado.
 
 ### Barbeiro
 
@@ -39,11 +40,11 @@ Cada tela tem layout de **celular** (coluna de 430px com barra inferior) e de **
 | `/barbeiro/agenda` | Agenda do dia | Navegar entre os dias, ver os confirmados e o previsto, concluir, marcar falta, lembrar no WhatsApp |
 | `/barbeiro/agendamento/novo` | Novo agendamento | Escolher da carteira ou cadastrar o cliente na hora, o serviço, o dia (14 à frente) e um horário livre; ou "outro horário" fora do expediente |
 | `/barbeiro/agendamento/:id` | Detalhe | Concluir, faltou, **remarcar** (dia e hora) e cancelar |
-| `/barbeiro/clientes` | Carteira | Buscar, cadastrar, editar; **aprovar ou recusar** quem criou conta com o telefone de um cliente |
+| `/barbeiro/clientes` | Carteira | Buscar, cadastrar, editar; **aprovar ou recusar** quem criou conta com o telefone de um cliente; **anonimizar** um cliente (LGPD) |
 | `/barbeiro/servicos` | Serviços | Criar e editar (preço, duração, insumo); ativar e desativar |
 | `/barbeiro/dashboard` | Financeiro | Faturamento, insumos e lucro do mês; variação sobre o mês anterior; mix de serviços com dica |
-| `/barbeiro/perfil` | Perfil | Nome e horário da barbearia, **link com botão de copiar**, trocar o slug, **faixas de atendimento** por dia, **bloqueios** (dia inteiro, período ou faixa de horas), sair de todos os aparelhos |
-| `/barbeiro/plano` | Plano | Teste ou assinatura, **assinar no cartão**, **pagar 1 mês no Pix**, gerenciar no portal do Stripe. É para cá que o Stripe volta (`?pagamento=ok`) |
+| `/barbeiro/perfil` | Perfil | Nome e horário da barbearia, **link com botão de copiar**, trocar o slug, **faixas de atendimento** por dia, **bloqueios** (dia inteiro, período ou faixa de horas), **privacidade** (e-mails, baixar meus dados, excluir a conta), sair de todos os aparelhos |
+| `/barbeiro/plano` | Plano | Teste ou assinatura, **assinar no cartão**, **pagar 1 mês no Pix**, gerenciar no portal do Stripe. Avisa a renovação automática, como cancelar e o direito de arrependimento antes de pagar. É para cá que o Stripe volta (`?pagamento=ok`) |
 
 Quando faltam 2 dias ou menos de acesso, ou quando a API responde **402** (assinatura vencida), aparece uma faixa no topo do painel com o link para o plano.
 
@@ -51,10 +52,10 @@ Quando faltam 2 dias ou menos de acesso, ou quando a API responde **402** (assin
 
 | Rota | Tela | O que dá para fazer |
 |---|---|---|
-| `/b/:slug` | Página da barbearia | Ver o nome e o horário; criar conta ou entrar |
-| `/b/:slug/cadastro` | Cadastro | Conta já ligada àquela barbearia (o vínculo pode ficar pendente de aprovação) |
+| `/b/:slug` | Página da barbearia | Ver o nome e o horário; criar conta ou entrar (cliente já logado vê "Agendar horário") |
+| `/b/:slug/cadastro` | Cadastro | Conta já ligada àquela barbearia (o vínculo pode ficar pendente de aprovação), com o aceite dos termos |
 | `/login` | Login | Entrar como cliente |
-| `/cliente/historico` | Histórico | Próximos horários (com cancelar), atendimentos anteriores, total de cortes e gasto |
+| `/cliente/historico` | Histórico | Próximos horários (com cancelar), atendimentos anteriores, total de cortes e gasto, privacidade (baixar e excluir os dados) |
 | `/cliente/agendar` | Agendar | Serviço → dia → horário livre → confirmar, com "adicionar ao Google Agenda" |
 
 ### Senha
@@ -63,6 +64,14 @@ Quando faltam 2 dias ou menos de acesso, ou quando a API responde **402** (assin
 |---|---|
 | `/esqueci-senha` | Pede o link (a resposta é a mesma, exista o e-mail ou não) |
 | `/redefinir-senha?token=...` | Nova senha; o token sai da URL assim que a tela abre |
+
+### Legais (públicas)
+
+| Rota | Tela |
+|---|---|
+| `/termos` | Termos de Uso: plano, renovação, cancelamento, arrependimento de 7 dias, idade mínima |
+| `/privacidade` | Política de Privacidade: dados, finalidades, bases legais, fornecedores, retenção, direitos, incidentes |
+| `/descadastro?token=...` | Destino do link "parar de receber" dos e-mails |
 
 ## Stack
 
@@ -101,6 +110,7 @@ O Vite faz proxy de `/api/*` para `http://localhost:8080`: tira o prefixo `/api`
 | `npm run build` | `tsc -b` + build de produção em `dist/` |
 | `npm run lint` | Oxlint |
 | `npm run preview` | serve o `dist/` localmente |
+| `npm run test:e2e` | smoke test no Chromium (Playwright): logins, páginas legais, aviso de cookies e aceite do cadastro |
 
 ## Estrutura
 
@@ -115,18 +125,22 @@ src/
 │   ├── cliente.ts      rotas do cliente logado
 │   ├── servico.ts      serviços (e a lista pública)
 │   ├── financeiro.ts   resumo
-│   └── assinatura.ts   status, checkout, portal
+│   ├── assinatura.ts   status, checkout, portal
+│   └── conta.ts        LGPD: baixar dados, excluir, preferências, descadastro
 ├── components/
+│   ├── conta/        AceiteTermos (cadastro), SecaoPrivacidade (perfil e histórico)
 │   ├── layout/       AppShell (celular), PanelShell + Sidebar (desktop), BottomNav,
-│   │                 navegacao (itens únicos dos dois menus), AvisoAssinatura, ProtectedRoute
-│   └── ui/           Button, Input (com mostrar senha), Card, Badge, Modal, Spinner,
+│   │                 navegacao (itens únicos dos dois menus), AvisoAssinatura, ProtectedRoute,
+│   │                 RodapeLegal, AvisoCookies
+│   └── ui/           Button, Input (com mostrar senha), Checkbox, Card, Badge, Modal, Spinner,
 │                     Carregando / ErroCarregar / Vazio
 ├── context/          AuthContext (token + /auth/me)
 ├── hooks/            useAuth, useCarregar, useMediaQuery / useIsDesktop
-├── pages/            auth/, barbeiro/, cliente/, publico/
+├── pages/            auth/, barbeiro/, cliente/, publico/, legal/
 ├── routes/           todas as rotas e a proteção por papel
 ├── types/            tipos espelhando os DTOs da API
-└── utils/            formatação (moeda, data, telefone), dias, rotas de login, status, ícone de serviço
+└── utils/            formatação (moeda, data, telefone), dias, rotas de login, status, ícone de serviço,
+                      legal (responsável e contato), consentimento (escolha do aviso de cookies)
 ```
 
 ## Como o front conversa com a API
@@ -144,7 +158,7 @@ src/
 
 O design system vem do arquivo de telas do ClipBook:
 - azul `#024ad8` sobre neutros;
-- fonte Inter;
+- fonte Inter, servida pelo próprio site (`@fontsource-variable/inter`, licença OFL), sem chamar o Google;
 - cards com borda e sombra suave;
 - a faixa diagonal do "poste de barbeiro" como assinatura visual.
 
@@ -154,12 +168,21 @@ Os tokens (`brand`, `ink`, `muted`, `line`, `danger`, `teal`...) ficam no `@them
 
 - **Nada de HTML vindo da API:** nenhum `dangerouslySetInnerHTML`, e o React escapa tudo.
 - **Token de redefinição:** sai da URL assim que a tela abre, para não vazar pelo histórico nem pelo `Referer`.
-- **Headers em produção:** o CloudFront aplica CSP (`default-src 'self'`, com Google Fonts liberado), HSTS, `nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`.
+- **Headers em produção:** o CloudFront aplica CSP (`default-src 'self'`, nenhum domínio de terceiro), HSTS, `nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`.
 - **Dependências:** `npm audit --audit-level=high` no CI, Dependabot semanal (sem versão principal de TypeScript e `@types/node`) e secret scanning com push protection.
+
+## Privacidade e consumidor (LGPD e CDC)
+
+- **Termos e Política de Privacidade** em `/termos` e `/privacidade`, com responsável e contato do encarregado no rodapé de todas as telas públicas.
+- **Aceite no cadastro:** caixa obrigatória "tenho 18 anos ou mais e aceito", gravada na API com versão e data. Novidades por e-mail ficam numa caixa **separada e desmarcada**.
+- **Cookies:** nenhum rastreador, nenhuma chamada a terceiros (nem fonte). O aviso tem "Recusar" e "Aceitar" com o mesmo peso; qualquer recurso opcional futuro deve checar `aceitouOpcionais()` antes de carregar.
+- **Direitos do titular:** baixar os dados (JSON), excluir a conta (com senha), mudar as preferências de e-mail; o barbeiro anonimiza clientes da carteira.
+- **Plano:** preço final sem taxas, aviso de renovação automática, cancelamento no mesmo lugar onde assinou e direito de arrependimento de 7 dias, tudo antes do pagamento.
+- **Acessibilidade:** campos e caixas com `label`, erros ligados por `aria-describedby`, foco visível, modal com `Esc` e navegação por teclado.
 
 ## CI/CD
 
-- **CI (`.github/workflows/ci.yml`), em todo PR e push no `master`:** `npm ci`, lint, build e `npm audit`.
+- **CI (`.github/workflows/ci.yml`), em todo PR e push no `master`:** `npm ci`, lint, build, smoke test no Chromium e `npm audit`.
 - **Deploy (`.github/workflows/deploy.yml`), depois do CI verde no `master`:**
   1. Login na AWS por **OIDC**, sem chave guardada.
   2. `npm run build` e `aws s3 sync`. Os assets vão com cache de 1 ano (o nome tem hash); o `index.html` vai sem cache.
@@ -173,5 +196,5 @@ Os tokens (`brand`, `ink`, `muted`, `line`, `danger`, `teal`...) ficam no `@them
 - **Agendar online exige conta** (decisão da API). Não existe o fluxo de convidado.
 - **Token no `localStorage`**, mitigado pela CSP. Cookie `HttpOnly` exigiria proteção CSRF.
 - **Sessão de 2h sem refresh.** Quando vence, a tela volta para o login.
-- **Sem testes automatizados de UI.** A conferência é manual no navegador; build, tipos e lint rodam no CI.
+- **Testes de UI só de fumaça.** O smoke test abre as telas públicas; os fluxos logados ainda são conferidos à mão.
 - **O bundle passa de 500 kB** (aviso do Vite). Dividir por rota com `import()` é o próximo passo, se o carregamento pesar.

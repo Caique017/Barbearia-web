@@ -60,7 +60,7 @@ export function RedefinirSenhaPage() {
   // Link sem token: não há o que redefinir.
   if (!token)
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8 lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:rounded-card lg:border lg:border-line lg:px-10 lg:py-10 lg:shadow-card">
         <h1 className="m-0 mb-1.5 text-[22px] font-medium leading-tight text-ink">
           Link inválido
         </h1>
@@ -75,7 +75,7 @@ export function RedefinirSenhaPage() {
 
   if (pronto)
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8 lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:rounded-card lg:border lg:border-line lg:px-10 lg:py-10 lg:shadow-card">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.9px] text-brand">
           Tudo certo
         </div>
@@ -100,7 +100,7 @@ export function RedefinirSenhaPage() {
     )
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col justify-center bg-screen px-[22px] py-8 lg:my-[8vh] lg:min-h-0 lg:max-w-[480px] lg:rounded-card lg:border lg:border-line lg:px-10 lg:py-10 lg:shadow-card">
       <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.9px] text-brand">
         Recuperar acesso
       </div>
